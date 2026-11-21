@@ -121,11 +121,20 @@ function initReveals() {
 
     // Horizontal pinned scroll (desktop only)
     const mm = gsap.matchMedia();
-    mm.add('(min-width: 900px)', () => {
+    mm.add('(min-width: 700px)', () => {
       gsap.utils.toArray<HTMLElement>('[data-hscroll]').forEach((section) => {
         const track = section.querySelector<HTMLElement>('[data-hscroll-track]');
         if (!track) return;
-        const dist = () => track.scrollWidth - window.innerWidth;
+        const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
+        // Re-measure whenever the strip changes size (fonts, images, late layout), so the pin never uses a stale width
+        if (typeof ResizeObserver !== 'undefined') {
+          let last = track.scrollWidth;
+          const ro = new ResizeObserver(() => {
+            if (track.scrollWidth !== last) { last = track.scrollWidth; ScrollTrigger.refresh(); }
+          });
+          ro.observe(track);
+          observers.push(ro);
+        }
         gsap.to(track, {
           x: () => -dist(),
           ease: 'none',
@@ -157,6 +166,8 @@ function initReveals() {
   });
 }
 
+let observers: ResizeObserver[] = [];
+
 export function initMotion() {
   document.documentElement.classList.add('js');
   initLenis();
@@ -177,10 +188,14 @@ export function initMotion() {
       document.documentElement.classList.add('fonts-ready');
       initReveals();
       ScrollTrigger.refresh();
+      // Layout can still shift after the first paint (images, late fonts): measure once more when everything has loaded
+      if (document.readyState !== 'complete') window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
     });
 }
 
 export function destroyMotion() {
+  observers.forEach((o) => o.disconnect());
+  observers = [];
   ctx?.revert();
   ctx = null;
   splits.forEach((s) => s.revert());
