@@ -1,0 +1,74 @@
+---
+import { site } from '../lib/site';
+const year = new Date().getFullYear();
+---
+<footer class="footer">
+  <div class="wrap">
+    <p class="eyebrow">Get in touch</p>
+    <a href={`mailto:${site.email}`} class="footer__cta" data-cursor="Write">
+      <span data-split>Let's explore<br /><span class="italic accent">something</span> together.</span>
+    </a>
+
+    <div class="footer__grid">
+      <div>
+        <p class="mono muted">Email</p>
+        <a class="link" href={`mailto:${site.email}`}>{site.email}</a>
+      </div>
+      <div>
+        <p class="mono muted">Elsewhere</p>
+        <ul class="footer__list">
+          {site.links.map((l) => <li><a class="link" href={l.href} target="_blank" rel="noopener">{l.label} ↗</a></li>)}
+          <li><a class="link" href="/cv">Résumé (PDF)</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="mono muted">Based in</p>
+        <p>{site.location}<br /><span class="mono muted">{site.coords}</span></p>
+      </div>
+      <div>
+        <p class="mono muted">Local time</p>
+        <p class="mono footer__clock" data-clock>--:--:-- IST</p>
+      </div>
+    </div>
+
+    <div class="footer__bottom mono muted">
+      <span>© {year} {site.name}</span>
+      <span>Built with Astro, Three.js & GSAP · Moon: NASA/LRO · Ceres: NASA/JPL-Caltech/UCLA/MPS/DLR/IDA</span>
+      <a href="#main" class="link" data-top>Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { getLenis } from '../lib/motion';
+  let timer: number | undefined;
+  function start() {
+    const el = document.querySelector<HTMLElement>('[data-clock]');
+    clearInterval(timer);
+    if (!el) return;
+    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const tick = () => (el.textContent = fmt.format(new Date()) + ' IST');
+    tick();
+    timer = window.setInterval(tick, 1000);
+    document.querySelector('[data-top]')?.addEventListener('click', (e) => {
+      const l = getLenis();
+      if (l) { e.preventDefault(); l.scrollTo(0); }
+    });
+  }
+  document.addEventListener('astro:page-load', start);
+</script>
+
+<style>
+  .footer { padding: clamp(100px, 14vw, 180px) 0 32px; border-top: 1px solid var(--line); }
+  .footer__cta {
+    display: block; font-family: var(--font-display); font-size: clamp(48px, 9vw, 150px); line-height: 0.98;
+    letter-spacing: -0.02em; margin-bottom: clamp(60px, 9vw, 120px); transition: color 0.4s;
+  }
+  .footer__cta:hover { color: var(--accent); }
+  .footer__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; padding-bottom: 60px; }
+  .footer__grid p.mono { margin-bottom: 10px; }
+  .footer__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+  .footer__bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line); }
+  @media (max-width: 800px) { .footer__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .footer__grid { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getCollection } from 'astro:content';
+
+const notes = (await getCollection('notes', (n) => !n.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+---
+<Base title="Notes" description="Build logs, how-tos and research explainers by Sourav Mahato.">
+  <PageHeader eyebrow="Notes" title="Field notes" italic="& build logs." lead="Write-ups of things I've built, tools I use and the science behind my research, explained simply." />
+  <section class="wrap">
+    <ul class="nlist">
+      {notes.map((n) => (
+        <li data-reveal>
+          <a href={`/notes/${n.id}`} class="nrow" data-cursor="Read">
+            <span class="mono muted">{fmt(n.data.date)}</span>
+            <div>
+              <h2 class="nrow__t">{n.data.title}</h2>
+              <p class="muted">{n.data.description}</p>
+            </div>
+            <span class="tags">{n.data.tags.map((t) => <span class="tag">{t}</span>)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    {notes.length < 3 && <p class="mono muted soon" data-reveal>More notes on the way.</p>}
+  </section>
+  <div class="section"></div>
+</Base>
+
+<style>
+  .nlist { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+  .nrow { display: grid; grid-template-columns: 140px 1fr auto; gap: 28px; padding: 36px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .nrow__t { font-size: clamp(28px, 3vw, 44px); margin-bottom: 12px; transition: color 0.3s; }
+  .nrow:hover .nrow__t { color: var(--accent); }
+  .nrow p { margin: 0; max-width: 60ch; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 240px; }
+  .soon { margin-top: 32px; }
+  @media (max-width: 800px) { .nrow { grid-template-columns: 1fr; gap: 12px; } .tags { justify-content: flex-start; } }
+</style>

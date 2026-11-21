@@ -1,0 +1,22 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  italic?: string;
+  lead?: string;
+}
+const { eyebrow, title, italic, lead } = Astro.props;
+---
+<header class="ph-head wrap">
+  <p class="eyebrow" data-reveal data-immediate>{eyebrow}</p>
+  <h1 class="display-l" data-split data-immediate>
+    {title}{italic && <> <span class="italic accent">{italic}</span></>}
+  </h1>
+  {lead && <p class="lead muted ph-head__lead" data-reveal data-immediate data-delay="0.3">{lead}</p>}
+  <slot />
+</header>
+
+<style>
+  .ph-head { padding-top: clamp(140px, 20vw, 240px); padding-bottom: clamp(48px, 7vw, 96px); }
+  .ph-head__lead { margin-top: 32px; max-width: 46ch; }
+</style>

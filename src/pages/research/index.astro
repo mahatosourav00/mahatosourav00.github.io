@@ -1,0 +1,125 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Media from '../../components/Media.astro';
+import { getCollection } from 'astro:content';
+
+const research = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
+const pubs = (await getCollection('publications')).sort((a, b) => parseInt(b.data.year) - parseInt(a.data.year));
+const byType = (t: string) => pubs.filter((p) => p.data.type === t);
+
+const skills = [
+  { h: 'Software & computation', t: 'Python, Linux (Raspberry Pi / Mint), Bash; basic C/C++ and Git.' },
+  { h: 'Python libraries', t: 'pysis, astropy, spectral, multiprocessing, numpy, scipy, seaborn, mpl-scatter-density.' },
+  { h: 'Methods & models', t: 'Hapke photometric model, Wöhler / Clark thermal models, artifact correction, odd-even effect correction, despiking.' },
+  { h: 'Archives & tools', t: 'USGS ISIS and NASA PDS; familiar with ODE, SPICE, QGIS, ArcGIS and ENVI.' },
+  { h: 'Hardware', t: 'CAD + 3D printing, stepper/servo control, ESP32 / Arduino / Raspberry Pi, RF links, ArduPilot.' },
+];
+---
+<Base title="Research" description="Planetary spectroscopy research: Chandrayaan-2 IIRS, Dawn VIR at Ceres, lunar thermal correction, plus publications, talks and skills.">
+  <PageHeader
+    eyebrow="Research"
+    title="Reading the light"
+    italic="of airless worlds."
+    lead="My work sits between orbit and lab: correcting spacecraft spectra for thermal emission, geometry and instrument artifacts, and building hardware to test those corrections."
+  />
+
+  <section class="wrap rcards">
+    {research.map((r, i) => (
+      <a href={`/research/${r.id}`} class="rcard" data-cursor="Read">
+        <div class="rcard__media">
+          <Media src={r.data.cover} alt={r.data.title} label={r.data.mission ?? r.data.short} ratio="16 / 10" />
+        </div>
+        <div class="rcard__body" data-reveal>
+          <div class="rcard__meta mono muted">
+            <span>0{i + 1}</span><span>{r.data.period}</span>
+          </div>
+          <h2 class="display-s rcard__title">{r.data.title}</h2>
+          <p class="mono muted">{r.data.role} · {r.data.org}</p>
+          <p class="rcard__sum">{r.data.summary}</p>
+          <div class="tags">{r.data.tags.map((t) => <span class="tag">{t}</span>)}</div>
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <section class="section wrap">
+    <p class="eyebrow" data-reveal>Publications</p>
+    <ul class="list">
+      {byType('paper').map((p) => (
+        <li class="row" data-reveal>
+          <span class="mono accent">{p.data.year}</span>
+          <div><p class="row__t">{p.data.title}</p><p class="mono muted">{p.data.authors} · {p.data.venue}</p></div>
+        </li>
+      ))}
+    </ul>
+
+    <div class="two">
+      <div>
+        <p class="eyebrow" data-reveal>Talks & workshops</p>
+        <ul class="list">
+          {[...byType('talk'), ...byType('workshop')].map((p) => (
+            <li class="row" data-reveal>
+              <span class="mono accent">{p.data.year}</span>
+              <div><p class="row__t">{p.data.title}</p><p class="mono muted">{p.data.venue}</p></div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p class="eyebrow" data-reveal>Fellowships</p>
+        <ul class="list">
+          {byType('fellowship').map((p) => (
+            <li class="row" data-reveal>
+              <span class="mono accent">{p.data.year}</span>
+              <div><p class="row__t">{p.data.title}</p><p class="mono muted">{p.data.authors}</p></div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap skills">
+    <p class="eyebrow" data-reveal>Toolkit</p>
+    <div class="sgrid">
+      {skills.map((s) => (
+        <div class="skill" data-reveal>
+          <h3 class="skill__h">{s.h}</h3>
+          <p class="muted">{s.t}</p>
+        </div>
+      ))}
+    </div>
+    <div class="cta" data-reveal>
+      <a class="btn btn--accent" href="/cv">Download résumé (PDF)</a>
+      <a class="btn" href="/lab">Play with the photometry toys →</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .rcards { display: grid; gap: clamp(64px, 9vw, 140px); }
+  .rcard { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
+  .rcard:nth-child(even) .rcard__media { order: 2; }
+  .rcard__meta { display: flex; justify-content: space-between; margin-bottom: 18px; }
+  .rcard__title { margin-bottom: 14px; transition: color 0.3s; }
+  .rcard:hover .rcard__title { color: var(--accent); }
+  .rcard__body .mono.muted { text-transform: none; letter-spacing: 0; }
+  .rcard__sum { margin: 18px 0 22px; font-size: 18px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  @media (max-width: 860px) { .rcard { grid-template-columns: 1fr; } .rcard:nth-child(even) .rcard__media { order: 0; } }
+
+  .list { list-style: none; margin: 0 0 80px; padding: 0; border-top: 1px solid var(--line); }
+  .row { display: grid; grid-template-columns: 90px 1fr; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .row__t { margin: 0 0 4px; font-size: 18px; line-height: 1.35; }
+  .row .mono.muted { margin: 0; text-transform: none; letter-spacing: 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 80px); }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; } .row { grid-template-columns: 70px 1fr; } }
+
+  .skills { padding-top: 0; }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .skill { background: var(--bg); padding: 28px; }
+  .skill__h { font-size: 26px; margin-bottom: 12px; }
+  .skill p { font-size: 15px; margin: 0; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 48px; }
+</style>

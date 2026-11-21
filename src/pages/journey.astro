@@ -1,0 +1,89 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { getCollection } from 'astro:content';
+
+const items = (await getCollection('timeline')).sort((a, b) => a.data.order - b.data.order);
+const now = [
+  { k: 'Working on', v: 'Chandrayaan-2 IIRS photometric pipeline' },
+  { k: 'Building', v: 'A motorized goniometer for lab scattering measurements' },
+  { k: 'Writing', v: 'Two Dawn VIR manuscripts on Ceres' },
+  { k: 'Looking for', v: 'A PhD in planetary science / instrumentation' },
+];
+const updated = 'November 2026';
+---
+<Base title="Journey" description="From Purulia to NISER, Max Planck Göttingen and ISRO's Chandrayaan-2: the path so far, and what Sourav is doing right now.">
+  <PageHeader eyebrow="Journey" title="The path" italic="so far." />
+
+  <section class="wrap now" data-reveal>
+    <div class="now__head">
+      <span class="mono"><i class="dot"></i>Now</span>
+      <span class="mono muted">Updated {updated}</span>
+    </div>
+    <dl class="now__grid">
+      {now.map((n) => (
+        <div><dt class="mono muted">{n.k}</dt><dd>{n.v}</dd></div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="section wrap">
+    <div class="tl-wrap">
+    <span class="tl__line" aria-hidden="true"><span class="tl__fill" data-draw></span></span>
+    <ol class="tl">
+      {items.map((it, i) => (
+        <li class:list={['tl__item', i % 2 ? 'tl__item--r' : 'tl__item--l']} data-reveal>
+          <span class:list={['tl__node', `tl__node--${it.data.kind}`]} aria-hidden="true"></span>
+          <p class="mono accent tl__year">{it.data.year}</p>
+          <h2 class="tl__title">{it.data.title}</h2>
+          <p class="mono muted tl__place">{it.data.place}</p>
+          <p class="muted tl__text">{it.data.text}</p>
+        </li>
+      ))}
+    </ol>
+    </div>
+    <div class="legend mono muted">
+      <span><i class="tl__node tl__node--education"></i>Education</span>
+      <span><i class="tl__node tl__node--research"></i>Research</span>
+      <span><i class="tl__node tl__node--award"></i>Fellowship / award</span>
+      <span><i class="tl__node tl__node--milestone"></i>Milestone</span>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .now { border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(24px, 3vw, 40px); background: var(--surface); }
+  .now__head { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 28px; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #5bd38a; margin-right: 10px; vertical-align: middle; }
+  .now__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin: 0; }
+  .now__grid dd { margin: 8px 0 0; font-family: var(--font-display); font-size: 24px; line-height: 1.15; }
+  @media (max-width: 900px) { .now__grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .now__grid { grid-template-columns: 1fr; } }
+
+  .tl-wrap { position: relative; }
+  .tl { position: relative; list-style: none; margin: 0; padding: 0; }
+  .tl__line { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .tl__fill { position: absolute; inset: 0; background: var(--accent); transform-origin: top; }
+  .tl__item { position: relative; width: 50%; padding: 0 56px 72px; }
+  .tl__item--l { text-align: right; }
+  .tl__item--r { margin-left: 50%; }
+  .tl__node { position: absolute; top: 6px; width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--accent); background: var(--bg); }
+  .tl__item--l .tl__node { right: -6px; }
+  .tl__item--r .tl__node { left: -5px; }
+  .tl__node--research { background: var(--accent); }
+  .tl__node--award { border-radius: 2px; transform: rotate(45deg); }
+  .tl__node--milestone { border-style: dashed; }
+  .tl__year { margin-bottom: 10px; }
+  .tl__title { font-size: clamp(26px, 2.6vw, 38px); margin-bottom: 8px; }
+  .tl__place { text-transform: none; letter-spacing: 0; margin-bottom: 12px; }
+  .tl__text { font-size: 16px; max-width: 46ch; display: inline-block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin-top: 32px; }
+  .legend span { display: inline-flex; align-items: center; gap: 10px; }
+  .legend .tl__node { position: static; }
+
+  @media (max-width: 760px) {
+    .tl__line { left: 5px; }
+    .tl__item, .tl__item--r { width: 100%; margin-left: 0; padding: 0 0 56px 36px; text-align: left; }
+    .tl__item--l .tl__node, .tl__item--r .tl__node { left: 0; right: auto; }
+  }
+</style>

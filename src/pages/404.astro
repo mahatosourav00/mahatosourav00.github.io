@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Lost in the regolith" footer={false}>
+  <section class="nf">
+    <canvas class="nf__globe" data-globe-404 aria-hidden="true"></canvas>
+    <div class="wrap nf__text">
+      <p class="mono accent" data-reveal data-immediate>Error 404 · signal lost</p>
+      <h1 class="display-xl" data-split data-immediate>Lost in the <span class="italic">regolith.</span></h1>
+      <p class="lead muted" data-reveal data-immediate data-delay="0.3">This page drifted out of orbit. Let's get you back to base.</p>
+      <a href="/" class="btn btn--accent" data-reveal data-immediate data-delay="0.4">Return home →</a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import type { Globe } from '../lib/globe';
+  let g: Globe | null = null;
+  document.addEventListener('astro:page-load', async () => {
+    const c = document.querySelector<HTMLCanvasElement>('[data-globe-404]');
+    if (c) g = (await import('../lib/globe')).createGlobe(c, { stars: true });
+  });
+  document.addEventListener('astro:before-swap', () => { g?.destroy(); g = null; });
+</script>
+
+<style>
+  .nf { position: relative; min-height: 100vh; min-height: 100svh; display: grid; align-items: center; overflow: hidden; }
+  .nf__globe { position: absolute; right: -10vw; top: 50%; transform: translateY(-50%); width: min(90vh, 80vw); aspect-ratio: 1; opacity: 0.85; }
+  .nf__text { position: relative; padding-top: 120px; }
+  .nf__text .lead { margin: 28px 0 36px; }
+</style>

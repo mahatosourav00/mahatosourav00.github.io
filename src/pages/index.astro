@@ -1,0 +1,350 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Media from '../components/Media.astro';
+import { getCollection } from 'astro:content';
+import { site } from '../lib/site';
+
+const research = (await getCollection('research')).filter((r) => r.data.featured).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.data.order);
+const pubs = (await getCollection('publications'))
+  .filter((p) => p.data.type === 'paper' || p.data.type === 'talk')
+  .sort((a, b) => parseInt(b.data.year) - parseInt(a.data.year))
+  .slice(0, 6);
+
+const stats = [
+  { n: '4', l: 'Planetary missions worked with' },
+  { n: '5', l: 'Conference talks' },
+  { n: '9+', l: 'Instruments & machines built' },
+  { n: '2', l: 'ISRO & Max Planck fellowships' },
+];
+---
+<Base>
+  <!-- ───── HERO ───── -->
+  <section class="hero" data-hero>
+    <div class="hero__stage">
+      <canvas class="hero__canvas" data-globe aria-label="Interactive 3D model of the Moon that morphs into Ceres as you scroll. Drag to spin it; move the cursor to move the Sun."></canvas>
+      <div class="hero__fallback" aria-hidden="true"></div>
+
+      <div class="wrap hero__content">
+        <div class="hero__top">
+          <span class="pill" data-reveal data-immediate data-delay="0.9"><i></i>{site.status}</span>
+        </div>
+
+        <div class="hero__title-wrap">
+          <h1 class="hero__title display-xl">
+            <span data-split data-immediate data-delay="0.15">Sourav</span>
+            <span data-split data-immediate data-delay="0.3" class="hero__title-2">Mahato</span>
+          </h1>
+          <p class="hero__role" data-reveal data-immediate data-delay="0.7">
+            Planetary scientist <span class="accent">&amp;</span><br />instrument builder
+          </p>
+        </div>
+
+        <div class="hero__story" data-story aria-live="polite">
+          <p class="display-s">I study how sunlight scatters off <span class="italic">airless worlds</span>, the Moon and Ceres, and I build the instruments to measure it.</p>
+        </div>
+
+        <div class="hero__bottom mono">
+          <span class="muted" data-reveal data-immediate data-delay="1"><span data-body-name>Moon</span> · R <span data-body-r>1737.4</span> km</span>
+          <span class="hero__hint muted" data-reveal data-immediate data-delay="1.1">Drag to spin · Scroll ↓</span>
+          <span class="muted hide-sm" data-reveal data-immediate data-delay="1.2">{site.coords}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── ABOUT ───── -->
+  <section class="section about">
+    <div class="wrap about__grid">
+      <div>
+        <p class="eyebrow" data-reveal>About</p>
+        <p class="about__big" data-split>
+          Half the time I'm deep in Python, cleaning up rough data beamed back from space missions. The other half I'm building things with my own hands: <span class="italic accent">spectrometers, trackers, drones.</span>
+        </p>
+        <p class="lead muted about__lead" data-reveal>I want to bring those two worlds together. I'm looking for a PhD where hardware and software meet planetary science.</p>
+        <div class="about__cta" data-reveal>
+          <a href="/journey" class="btn">My journey →</a>
+          <a href="/cv" class="btn">Résumé</a>
+        </div>
+      </div>
+      <div class="about__side">
+        <Media alt="Portrait of Sourav Mahato" label="Portrait" ratio="4 / 5" />
+        <dl class="stats">
+          {stats.map((s) => (
+            <div class="stat" data-reveal>
+              <dt class="stat__n">{s.n}</dt>
+              <dd class="mono muted">{s.l}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── RESEARCH ───── -->
+  <section class="section research">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal>Selected research</p>
+        <h2 class="display-l" data-split>From orbit <span class="italic">to the lab.</span></h2>
+      </div>
+      <ul class="rlist" data-rlist>
+        {research.map((r, i) => (
+          <li>
+            <a href={`/research/${r.id}`} class="rrow" data-cursor="Read" data-preview={r.data.mission ?? r.data.short}>
+              <span class="mono muted rrow__i">0{i + 1}</span>
+              <span class="rrow__title">{r.data.title}</span>
+              <span class="mono muted rrow__m">{r.data.mission}</span>
+              <span class="mono muted rrow__p">{r.data.period}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="rpreview" data-rpreview aria-hidden="true"><span></span></div>
+      <a href="/research" class="btn more" data-reveal>All research & publications →</a>
+    </div>
+  </section>
+
+  <!-- ───── BUILDS (horizontal) ───── -->
+  <section class="builds" data-hscroll>
+    <div class="builds__track" data-hscroll-track>
+      <div class="builds__intro">
+        <p class="eyebrow">The lab bench</p>
+        <h2 class="display-l">Things I've <span class="italic accent">built.</span></h2>
+        <p class="muted builds__p">Low-cost instruments, robots and flying machines. Most of them 3D printed, all of them taken apart at least once.</p>
+        <a href="/projects" class="btn">All builds →</a>
+      </div>
+      {projects.slice(0, 7).map((p, i) => (
+        <div class="builds__card"><ProjectCard project={p} index={i} /></div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ───── HOBBIES ───── -->
+  <section class="section hobbies">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow" data-reveal>Off the clock</p>
+        <h2 class="display-l" data-split>Looking up, <span class="italic">looking closer.</span></h2>
+      </div>
+      <div class="hgrid">
+        {albums.map((a, i) => (
+          <a href={`/hobbies/${a.id}`} class:list={['hcard', `hcard--${i}`]} data-cursor="Open">
+            <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio={i === 0 ? '4 / 5' : '4 / 3'} />
+            <div class="hcard__meta">
+              <span class="mono muted">{a.data.kicker}</span>
+              <h3 class="display-s">{a.data.title}</h3>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── PUBLICATIONS ───── -->
+  <section class="section pubs">
+    <div class="wrap pubs__grid">
+      <div>
+        <p class="eyebrow" data-reveal>Papers & talks</p>
+        <h2 class="display-m" data-split>Sharing the <span class="italic">work.</span></h2>
+      </div>
+      <ul class="plist">
+        {pubs.map((p) => (
+          <li class="pitem" data-reveal>
+            <span class="mono accent">{p.data.year}</span>
+            <div>
+              <p class="pitem__t">{p.data.title}</p>
+              <p class="mono muted">{p.data.venue}</p>
+            </div>
+            <span class="tag">{p.data.type}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import type { Globe } from '../lib/globe';
+
+  let globe: Globe | null = null;
+  let onScroll: (() => void) | null = null;
+
+  async function init() {
+    const canvas = document.querySelector<HTMLCanvasElement>('[data-globe]');
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!canvas || !hero) return;
+
+    const { createGlobe } = await import('../lib/globe');
+    globe = createGlobe(canvas);
+    if (!globe) hero.classList.add('no-webgl');
+    else globe.ready.then(() => requestAnimationFrame(() => hero.classList.add('is-ready')));
+
+    const story = hero.querySelector<HTMLElement>('[data-story]');
+    const name = hero.querySelector<HTMLElement>('[data-body-name]');
+    const radius = hero.querySelector<HTMLElement>('[data-body-r]');
+    let lastCeres: boolean | null = null;
+
+    onScroll = () => {
+      const total = hero.offsetHeight - window.innerHeight;
+      const p = Math.min(1, Math.max(0, window.scrollY / Math.max(total, 1)));
+      globe?.setScroll(p);
+      globe?.setMix((p - 0.25) / 0.45);
+      hero.style.setProperty('--p', p.toFixed(3));
+      story?.classList.toggle('is-on', p > 0.3);
+      const ceres = p > 0.5;
+      if (ceres !== lastCeres && name && radius) {
+        name.textContent = ceres ? 'Ceres' : 'Moon';
+        radius.textContent = ceres ? '469.7' : '1737.4';
+        lastCeres = ceres;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Floating preview for research rows
+    const list = document.querySelector<HTMLElement>('[data-rlist]');
+    const prev = document.querySelector<HTMLElement>('[data-rpreview]');
+    if (list && prev && matchMedia('(hover: hover)').matches) {
+      list.addEventListener('pointermove', (e) => {
+        prev.style.transform = `translate(${e.clientX + 24}px, ${e.clientY - 90}px)`;
+      });
+      list.querySelectorAll<HTMLElement>('[data-preview]').forEach((row) => {
+        row.addEventListener('pointerenter', () => {
+          prev.querySelector('span')!.textContent = row.dataset.preview || '';
+          prev.classList.add('is-on');
+        });
+        row.addEventListener('pointerleave', () => prev.classList.remove('is-on'));
+      });
+    }
+  }
+
+  function destroy() {
+    globe?.destroy();
+    globe = null;
+    if (onScroll) window.removeEventListener('scroll', onScroll);
+    onScroll = null;
+  }
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', destroy);
+</script>
+
+<style>
+  /* Hero */
+  .hero { position: relative; height: 230vh; height: 230svh; }
+  .hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+  .hero__canvas {
+    position: absolute; top: 50%; left: 62%; width: min(78vh, 62vw); aspect-ratio: 1; height: auto;
+    transform: translate(-50%, -50%) translateX(calc(var(--p, 0) * 10vw)) scale(calc(1 + var(--p, 0) * 0.12));
+    opacity: 0; transition: opacity 1.6s var(--ease); touch-action: pan-y; cursor: grab;
+  }
+  .hero__canvas:active { cursor: grabbing; }
+  .hero.is-ready .hero__canvas { opacity: 1; }
+  .hero__fallback { display: none; }
+  .no-webgl .hero__fallback {
+    display: block; position: absolute; top: 50%; left: 62%; width: min(60vh, 50vw); aspect-ratio: 1; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 30% 35%, #d9d6cf, #7d7a73 45%, #1a1a1a 72%);
+  }
+  .hero__content { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-top: 110px; padding-bottom: 28px; pointer-events: none; }
+  .hero__content a, .hero__content button { pointer-events: auto; }
+  .hero__top { display: flex; justify-content: flex-start; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 999px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; backdrop-filter: blur(8px); }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: #5bd38a; box-shadow: 0 0 0 0 #5bd38a88; animation: pulse 2s infinite; }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 10px #5bd38a00; } 100% { box-shadow: 0 0 0 0 #5bd38a00; } }
+
+  .hero__title-wrap { align-self: center; transition: opacity 0.6s, transform 0.8s var(--ease); }
+  .hero__title { line-height: 0.86; letter-spacing: -0.03em; }
+  .hero__title > span { display: block; }
+  .hero__title-2 { padding-left: 0.5em; font-style: italic; }
+  .hero__role { margin-top: 28px; font-size: clamp(16px, 1.4vw, 20px); color: var(--muted); line-height: 1.4; }
+
+  .hero__story {
+    position: absolute; left: var(--gutter); bottom: 22%; max-width: min(560px, 80vw);
+    opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    text-shadow: 0 2px 24px var(--bg), 0 0 2px var(--bg);
+  }
+  .hero__story.is-on { opacity: 1; transform: none; }
+  .hero:has(.is-on) .hero__title-wrap { opacity: 0; transform: translateY(-40px); }
+
+  .hero__bottom { display: flex; justify-content: space-between; gap: 16px; }
+  .hero__hint { animation: bob 2.4s var(--ease) infinite; }
+  @keyframes bob { 50% { transform: translateY(4px); } }
+
+  @media (max-width: 800px) {
+    .hero__canvas, .no-webgl .hero__fallback { left: 50%; top: 56%; width: 120vw; opacity: 0.55; }
+    .hero.is-ready .hero__canvas { opacity: 0.6; }
+    .hero__canvas { transform: translate(-50%, -50%) scale(calc(1 + var(--p, 0) * 0.1)); }
+    .hide-sm { display: none; }
+    .hero__title-wrap { text-shadow: 0 2px 30px var(--bg); }
+  }
+
+  /* About */
+  .about__grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(40px, 8vw, 120px); align-items: start; }
+  .about__big { font-family: var(--font-display); font-size: clamp(30px, 3.6vw, 56px); line-height: 1.1; margin-bottom: 36px; }
+  .about__lead { max-width: 44ch; }
+  .about__cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 36px; }
+  .about__side { position: sticky; top: 120px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 20px; margin: 32px 0 0; }
+  .stat { border-top: 1px solid var(--line); padding-top: 14px; }
+  .stat__n { font-family: var(--font-display); font-size: 52px; line-height: 1; }
+  .stat dd { margin: 8px 0 0; font-size: 11px; }
+  @media (max-width: 900px) { .about__grid { grid-template-columns: 1fr; } .about__side { position: static; } }
+
+  /* Section heads */
+  .sec-head { margin-bottom: clamp(48px, 7vw, 96px); }
+
+  /* Research rows */
+  .rlist { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+  .rrow {
+    display: grid; grid-template-columns: 60px 1fr 180px 170px; gap: 20px; align-items: baseline;
+    padding: 30px 0; border-bottom: 1px solid var(--line); transition: padding 0.5s var(--ease), color 0.3s;
+  }
+  .rrow__title { font-family: var(--font-display); font-size: clamp(24px, 2.6vw, 40px); line-height: 1.1; }
+  .rrow:hover { padding-left: 16px; color: var(--accent); }
+  .rrow__p { text-align: right; }
+  .rpreview {
+    position: fixed; left: 0; top: 0; z-index: 40; width: 220px; height: 150px; border-radius: var(--radius); pointer-events: none;
+    background: radial-gradient(circle at 35% 40%, #cfcabf, #6b675f 45%, #151515 75%); display: grid; place-items: end start; padding: 12px;
+    opacity: 0; scale: 0.8; transition: opacity 0.3s, scale 0.4s var(--ease);
+  }
+  .rpreview span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: #fff; letter-spacing: 0.05em; }
+  .rpreview.is-on { opacity: 1; scale: 1; }
+  .more { margin-top: 48px; }
+  @media (max-width: 800px) {
+    .rrow { grid-template-columns: 36px 1fr; }
+    .rrow__m { display: none; }
+    .rrow__p { grid-column: 2; text-align: left; }
+  }
+
+  /* Builds horizontal */
+  .builds { overflow: hidden; padding-block: clamp(60px, 8vw, 100px); }
+  .builds__track { display: flex; gap: clamp(24px, 3vw, 48px); padding-inline: var(--gutter); align-items: center; min-height: 80vh; width: max-content; }
+  .builds__intro { width: min(440px, 80vw); flex-shrink: 0; padding-right: 40px; }
+  .builds__p { margin: 24px 0 32px; max-width: 34ch; }
+  .builds__card { width: clamp(280px, 26vw, 400px); flex-shrink: 0; }
+  @media (max-width: 899px) {
+    .builds__track { width: auto; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 20px; min-height: 0; align-items: flex-start; }
+    .builds__card { scroll-snap-align: start; width: 78vw; }
+    .builds__intro { width: 82vw; }
+  }
+
+  /* Hobbies */
+  .hgrid { display: grid; grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto; gap: clamp(20px, 3vw, 40px); }
+  .hcard--0 { grid-row: span 2; }
+  .hcard__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-top: 16px; }
+  .hcard:hover h3 { color: var(--accent); }
+  .hcard h3 { transition: color 0.3s; }
+  @media (max-width: 800px) { .hgrid { grid-template-columns: 1fr; } .hcard--0 { grid-row: auto; } }
+
+  /* Publications */
+  .pubs__grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: clamp(40px, 6vw, 100px); }
+  .plist { list-style: none; padding: 0; margin: 0; }
+  .pitem { display: grid; grid-template-columns: 70px 1fr auto; gap: 20px; align-items: start; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .pitem__t { margin: 0 0 6px; font-size: 18px; line-height: 1.35; }
+  .pitem .mono.muted { margin: 0; text-transform: none; letter-spacing: 0; }
+  @media (max-width: 800px) { .pubs__grid { grid-template-columns: 1fr; } .pitem { grid-template-columns: 54px 1fr; } .pitem .tag { display: none; } }
+</style>

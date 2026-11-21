@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Media from '../../components/Media.astro';
+import { getCollection } from 'astro:content';
+
+const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="Hobbies" description="Astrophotography, photography and 3D printing by Sourav Mahato.">
+  <PageHeader
+    eyebrow="Hobbies"
+    title="What I do"
+    italic="after hours."
+    lead="Most of my hobbies end up feeding my research, and most of my research started as a hobby. Here's the overlap."
+  />
+
+  <section class="wrap doors">
+    {albums.map((a, i) => (
+      <a href={`/hobbies/${a.id}`} class="door" data-cursor="Enter">
+        <span class="mono muted door__i">0{i + 1}</span>
+        <div class="door__text">
+          <span class="mono accent">{a.data.kicker}</span>
+          <h2 class="display-l door__title">{a.data.title}</h2>
+          <p class="muted door__intro">{a.data.intro}</p>
+          <span class="mono muted">{a.data.items.length} frames →</span>
+        </div>
+        <div class="door__media">
+          <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio="4 / 3" />
+        </div>
+      </a>
+    ))}
+  </section>
+
+  <section class="section wrap more">
+    <p class="eyebrow" data-reveal>Also into</p>
+    <ul class="also" data-reveal>
+      <li>FPV flying</li><li>Home automation</li><li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .doors { display: grid; border-top: 1px solid var(--line); }
+  .door { display: grid; grid-template-columns: 60px 1fr 1fr; gap: clamp(20px, 4vw, 60px); align-items: center; padding: clamp(40px, 6vw, 80px) 0; border-bottom: 1px solid var(--line); }
+  .door__i { align-self: start; }
+  .door__title { margin: 12px 0 20px; transition: color 0.4s, transform 0.6s var(--ease); }
+  .door:hover .door__title { color: var(--accent); transform: translateX(12px); }
+  .door__intro { max-width: 40ch; }
+  .also { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 32px; font-family: var(--font-display); font-size: clamp(28px, 3.4vw, 48px); }
+  .also li:not(:last-child)::after { content: '·'; margin-left: 32px; color: var(--accent); }
+  @media (max-width: 800px) { .door { grid-template-columns: 1fr; } .door__i { display: none; } }
+</style>

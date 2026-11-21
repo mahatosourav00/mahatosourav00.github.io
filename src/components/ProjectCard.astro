@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Media from './Media.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  index?: number;
+}
+const { project, index } = Astro.props;
+const d = project.data;
+---
+<a href={`/projects/${project.id}`} class="pcard" data-cursor="View" data-reveal>
+  <Media src={d.cover} alt={d.title} label={d.title} ratio="4 / 5" reveal={false} sizes="(max-width: 800px) 85vw, 420px" />
+  <div class="pcard__meta">
+    <span class="mono muted">{index !== undefined ? String(index + 1).padStart(2, '0') + ' · ' : ''}{d.kind}</span>
+    <span class="mono muted">{d.year}</span>
+  </div>
+  <h3 class="pcard__title">{d.title}</h3>
+  <p class="pcard__sum muted">{d.summary}</p>
+</a>
+
+<style>
+  .pcard { display: block; }
+  .pcard__meta { display: flex; justify-content: space-between; gap: 12px; margin: 18px 0 8px; }
+  .pcard__title { font-size: clamp(26px, 2.4vw, 34px); transition: color 0.3s; }
+  .pcard:hover .pcard__title { color: var(--accent); }
+  .pcard__sum { font-size: 15px; margin-top: 10px; max-width: 42ch; }
+</style>

@@ -1,0 +1,15 @@
+[
+  { "id": "p-ceres", "title": "Spectrophotometric study of Ceres using VIR instrument data from DAWN mission", "authors": "S. Mahato, G. Thangjam", "venue": "Manuscript in preparation", "year": "2026", "type": "paper" },
+  { "id": "p-artifact", "title": "Artifact Correction of DAWN-VIR Instrument Data", "authors": "S. Mahato, G. Thangjam", "venue": "Manuscript in preparation", "year": "2026", "type": "paper" },
+  { "id": "t-step25", "title": "Spectrophotometric & thermal correction studies", "authors": "S. Mahato", "venue": "STEP-2025, IIT Roorkee", "year": "2025", "type": "talk" },
+  { "id": "t-ipsc25", "title": "Spectrophotometric study of Ceres", "authors": "S. Mahato", "venue": "IPSC-2025, Roorkee", "year": "2025", "type": "talk" },
+  { "id": "w-ngri", "title": "AI-ML Training Programme for Geophysical Data Analysis", "authors": "7-day programme", "venue": "CSIR-NGRI, Hyderabad", "year": "2025", "type": "workshop" },
+  { "id": "t-nsss24", "title": "Photometric correction of Dawn VIR data", "authors": "S. Mahato", "venue": "NSSS-2024, Goa", "year": "2024", "type": "talk" },
+  { "id": "t-mps24", "title": "Guest scientist presentation, Ceres Workshop", "authors": "S. Mahato", "venue": "MPS, Göttingen, Germany", "year": "2024", "type": "talk" },
+  { "id": "t-ipsc23", "title": "Thermal correction of Chandrayaan-1 hyperspectral data", "authors": "S. Mahato", "venue": "IPSC-2023, PRL Ahmedabad", "year": "2023", "type": "talk" },
+  { "id": "w-ch3", "title": "Chandrayaan-3 Data Analysis Workshop", "authors": "Hosted and funded by ISSDC", "venue": "ISRO, Bengaluru", "year": "2023", "type": "workshop" },
+  { "id": "f-isro", "title": "Junior Research Fellowship, Chandrayaan-2 Science Project", "authors": "ISRO / Department of Space", "venue": "SEPS, NISER", "year": "2026–now", "type": "fellowship" },
+  { "id": "f-mpg", "title": "Max Planck Group (MPG) Ceres Fellowship", "authors": "Max Planck Group", "venue": "Collaborative research on Ceres", "year": "2024–25", "type": "fellowship" },
+  { "id": "f-disha", "title": "DISHA Studentship", "authors": "Department of Atomic Energy, Govt. of India", "venue": "Integrated M.Sc., NISER", "year": "2018–23", "type": "fellowship" },
+  { "id": "f-nius", "title": "NIUS Fellowship", "authors": "HBCSE-TIFR", "venue": "National Initiative on Undergraduate Science", "year": "2019–20", "type": "fellowship" }
+]

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+const pdf = '/cv/Sourav-Mahato-Resume.pdf';
+---
+<Base title="Résumé" description="Download or view Sourav Mahato's academic résumé.">
+  <PageHeader eyebrow="Curriculum vitae" title="Résumé" italic="(PDF)">
+    <div class="actions" data-reveal data-immediate data-delay="0.4">
+      <a class="btn btn--accent" href={pdf} download>Download PDF ↓</a>
+      <a class="btn" href={pdf} target="_blank" rel="noopener">Open in new tab ↗</a>
+    </div>
+  </PageHeader>
+  <section class="wrap viewer" data-reveal>
+    <object data={pdf} type="application/pdf" aria-label="Résumé PDF">
+      <p class="muted">Your browser can't show PDFs inline. <a class="link accent" href={pdf}>Download it here.</a></p>
+    </object>
+  </section>
+  <div class="section"></div>
+</Base>
+
+<style>
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 36px; }
+  .viewer object { width: 100%; height: 88vh; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); }
+</style>

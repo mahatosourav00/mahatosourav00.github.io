@@ -1,0 +1,58 @@
+---
+import Article from '../../layouts/Article.astro';
+import Media from '../../components/Media.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const items = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return items.map((entry, i) => ({ params: { id: entry.id }, props: { entry, next: items[(i + 1) % items.length] } }));
+}
+const { entry, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Article
+  title={d.title}
+  description={d.summary}
+  eyebrow={`Build · ${d.kind}`}
+  back={{ href: '/projects', label: 'All builds' }}
+  meta={[{ k: 'Year', v: d.year }, { k: 'Type', v: d.kind }, { k: 'Stack', v: d.tags.join(', ') }]}
+  next={{ href: `/projects/${next.id}`, title: next.data.title }}
+>
+  <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.title} ratio="21 / 9" eager sizes="100vw" /></div>
+
+  <Content />
+
+  {d.gallery.length > 0 && (
+    <div class="gallery not-prose">
+      {d.gallery.map((g) => (
+        <figure>
+          <Media src={g.src} alt={g.caption} label={g.caption} ratio="4 / 3" />
+          <figcaption class="mono muted">{g.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  )}
+
+  <div slot="aside" class="specs">
+    <p class="mono muted">Spec sheet</p>
+    <dl>
+      {d.specs.map((s) => (
+        <div class="spec"><dt class="mono muted">{s.k}</dt><dd>{s.v}</dd></div>
+      ))}
+    </dl>
+  </div>
+</Article>
+
+<style>
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
+  .gallery figure { margin: 0; }
+  .gallery figcaption { margin-top: 10px; text-transform: none; letter-spacing: 0; }
+  .gallery figure:first-child { grid-column: span 2; }
+  .specs { position: sticky; top: 120px; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--surface); }
+  .specs dl { margin: 16px 0 0; }
+  .spec { padding: 12px 0; border-top: 1px solid var(--line); }
+  .spec dt { font-size: 10px; }
+  .spec dd { margin: 4px 0 0; font-size: 15px; }
+  @media (max-width: 600px) { .gallery { grid-template-columns: 1fr; } .gallery figure:first-child { grid-column: auto; } }
+</style>

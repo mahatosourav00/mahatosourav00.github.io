@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
+---
+<Base title="Builds" description="Instruments, robots and flying machines built by Sourav Mahato: a goniometer, a 3D-printed spectrometer, an astro-tracker, FPV drones and more.">
+  <PageHeader
+    eyebrow="Builds"
+    title="Made by"
+    italic="hand."
+    lead="Scientific instruments, robots and flying machines. Cheap where possible, 3D printed where sensible, and always open to being taken apart again."
+  />
+
+  <section class="wrap">
+    <div class="filters" role="group" aria-label="Filter builds" data-reveal data-immediate data-delay="0.4">
+      {kinds.map((k, i) => (
+        <button class:list={['filter', { 'is-on': i === 0 }]} data-filter={k} aria-pressed={i === 0 ? 'true' : 'false'}>{k}</button>
+      ))}
+    </div>
+    <div class="pgrid">
+      {projects.map((p, i) => (
+        <div class="pgrid__item" data-kind={p.data.kind}><ProjectCard project={p} index={i} /></div>
+      ))}
+    </div>
+  </section>
+  <div class="section"></div>
+</Base>
+
+<script>
+  import { ScrollTrigger } from '../../lib/motion';
+  function init() {
+    const btns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const items = document.querySelectorAll<HTMLElement>('.pgrid__item');
+    btns.forEach((b) =>
+      b.addEventListener('click', () => {
+        const k = b.dataset.filter;
+        btns.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+        items.forEach((it) => { it.hidden = !(k === 'All' || it.dataset.kind === k); });
+        ScrollTrigger.refresh();
+      }),
+    );
+  }
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 56px; }
+  .filter { padding: 9px 16px; border: 1px solid var(--line-strong); border-radius: 999px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); transition: all 0.3s var(--ease); }
+  .filter:hover { color: var(--text); }
+  .filter.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 64px clamp(20px, 3vw, 40px); }
+  .pgrid__item:nth-child(3n + 2) { margin-top: 80px; }
+  .pgrid__item[hidden] { display: none; }
+  @media (max-width: 1000px) { .pgrid { grid-template-columns: 1fr 1fr; } .pgrid__item:nth-child(3n + 2) { margin-top: 0; } .pgrid__item:nth-child(even) { margin-top: 60px; } }
+  @media (max-width: 620px) { .pgrid { grid-template-columns: 1fr; } .pgrid__item:nth-child(even) { margin-top: 0; } }
+</style>

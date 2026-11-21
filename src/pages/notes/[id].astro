@@ -1,0 +1,25 @@
+---
+import Article from '../../layouts/Article.astro';
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes', (n) => !n.data.draft);
+  return notes.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const words = (entry.body ?? '').split(/\s+/).length;
+const minutes = Math.max(1, Math.round(words / 220));
+const date = d.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+---
+<Article
+  title={d.title}
+  description={d.description}
+  eyebrow="Note"
+  back={{ href: '/notes', label: 'All notes' }}
+  meta={[{ k: 'Published', v: date }, { k: 'Reading time', v: `${minutes} min` }, { k: 'Tags', v: d.tags.join(', ') }]}
+>
+  <Content />
+</Article>

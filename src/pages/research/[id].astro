@@ -1,0 +1,37 @@
+---
+import Article from '../../layouts/Article.astro';
+import Media from '../../components/Media.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const items = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
+  return items.map((entry, i) => ({ params: { id: entry.id }, props: { entry, next: items[(i + 1) % items.length] } }));
+}
+const { entry, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<Article
+  title={d.title}
+  description={d.summary}
+  eyebrow={d.mission ? `Research · ${d.mission}` : 'Research'}
+  back={{ href: '/research', label: 'All research' }}
+  meta={[
+    { k: 'Role', v: d.role },
+    { k: 'Where', v: d.org },
+    { k: 'When', v: d.period },
+  ]}
+  next={{ href: `/research/${next.id}`, title: next.data.short }}
+>
+  <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.mission ?? d.short} ratio="21 / 9" eager sizes="100vw" /></div>
+  <Content />
+  <div slot="aside" class="aside">
+    <p class="mono muted">Keywords</p>
+    <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>
+  </div>
+</Article>
+
+<style>
+  .aside { position: sticky; top: 120px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+</style>

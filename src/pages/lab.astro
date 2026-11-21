@@ -1,0 +1,283 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+const tex = (src: string, display = false) => katex.renderToString(src, { displayMode: display, throwOnError: false });
+const eqMain = tex(String.raw`r(i,e,g)\;=\;\frac{w}{4\pi}\,\frac{\mu_0}{\mu_0+\mu}\Big\{\big[1+B(g)\big]\,P(g)+H(\mu_0)\,H(\mu)-1\Big\}\,S(i,e,g)`, true);
+const eqIF = tex(String.raw`I/F=\pi r`, false);
+const eqDefs = [
+  { name: 'Opposition effect', note: 'shadow hiding; B₀ is the amplitude, h the width', src: String.raw`B(g)=\frac{B_0}{1+\dfrac{\tan(g/2)}{h}}` },
+  { name: 'Particle phase function', note: 'one-term Henyey–Greenstein; b > 0 scatters backward', src: String.raw`P(g)=\frac{1-b^{2}}{\left(1-2b\cos g+b^{2}\right)^{3/2}}` },
+  { name: 'Multiple scattering', note: 'Chandrasekhar H-function, approximate form', src: String.raw`H(x)\simeq\frac{1+2x}{1+2\gamma x},\qquad \gamma=\sqrt{1-w}` },
+  { name: 'Macroscopic roughness', note: 'approximate shadowing from mean slope θ̄', src: String.raw`S\approx\exp\!\Big[-0.32\,\bar\theta\sqrt{\tan\bar\theta\,\tan\tfrac{g}{2}}\;-\;0.52\,\bar\theta\,\tan\bar\theta\,\tan\tfrac{g}{2}\Big]` },
+].map((d) => ({ ...d, html: tex(d.src, true) }));
+
+const phase = { id: 'hk-g', name: 'g', label: 'Phase angle', min: 0, max: 150, step: 1, value: 50, hint: 'Angle between the Sun and you, seen from the surface. Also set by dragging in the zoom view.' };
+const groups = {
+  hapke: [
+    { id: 'hk-w', name: 'w', label: 'Single-scattering albedo w', min: 0.02, max: 0.98, step: 0.01, value: 0.32, hint: 'How much light one grain scatters instead of absorbing.' },
+    { id: 'hk-b', name: 'b', label: 'Asymmetry b', min: -0.6, max: 0.8, step: 0.01, value: 0.25, hint: '> 0: grains scatter back toward the Sun.' },
+    { id: 'hk-B0', name: 'B0', label: 'Opposition surge B₀', min: 0, max: 2, step: 0.05, value: 1, hint: 'Brightening when shadows hide near g = 0°. Used on the body and zoom views.' },
+    { id: 'hk-h', name: 'h', label: 'Surge width h', min: 0.01, max: 0.3, step: 0.01, value: 0.07, hint: 'Linked to porosity. In the grain view it sets how tightly grains pack.' },
+    { id: 'hk-th', name: 'theta', label: 'Roughness θ̄ (°)', min: 0, max: 45, step: 1, value: 20, hint: 'Slopes the terrain cannot resolve. With real terrain on, only the leftover.' },
+  ],
+  view: [
+    { id: 'hk-az', name: 'azdeg', label: 'Sun azimuth (°)', min: 0, max: 360, step: 1, value: 180, hint: 'Direction the light comes from. Also set by dragging in the zoom view.' },
+    { id: 'hk-lon', name: 'lon', label: 'Central longitude (°)', min: -180, max: 180, step: 1, value: 0, hint: 'Turn the body to look at different terrain.' },
+    { id: 'hk-lat', name: 'lat', label: 'Patch latitude (°)', min: -80, max: 80, step: 1, value: 15, hint: 'Set by clicking the body; fine-tune here.' },
+    { id: 'hk-plon', name: 'plon', label: 'Patch longitude offset (°)', min: -80, max: 80, step: 1, value: 0, hint: 'Relative to the centre of the disc.' },
+    { id: 'hk-zoom', name: 'zoom', label: 'Patch width (° of arc)', min: 3, max: 30, step: 1, value: 12, hint: 'Width of the zoom patch. Smaller means closer.' },
+  ],
+  terrain: [
+    { id: 'hk-relief', name: 'relief', label: 'Relief exaggeration ×', min: 0, max: 3, step: 0.1, value: 1, hint: 'Vertical stretch of the digital terrain model.' },
+    { id: 'hk-detail', name: 'detail', label: 'Fine detail', min: 0, max: 1.5, step: 0.05, value: 0.7, hint: 'Craters and bumps below the data resolution (synthetic).' },
+  ],
+};
+---
+<Base title="Lab" description="Interactive planetary science toys: a Hapke photometric model you can play with and a reflectance spectrum explorer.">
+  <PageHeader
+    eyebrow="Lab · interactive"
+    title="Play with"
+    italic="the physics."
+    lead="Two small toys built around the models I use every day. Drag, slide and see how light, grains and heat shape what a spacecraft actually measures."
+  />
+
+  <!-- Hapke -->
+  <section class="wrap toy" data-hapke>
+    <div class="toy__head" data-reveal>
+      <span class="mono accent">Toy 01</span>
+      <h2 class="display-m">The Hapke body</h2>
+      <p class="muted">An airless body shaded with a simplified <em>Hapke</em> reflectance model, with real terrain from the Moon's LOLA or Ceres' Dawn data. <strong>Click the body</strong> to choose a patch, <strong>drag in the zoom view</strong> to move the Sun, and lower the phase angle toward 0° to watch the shadows between grains vanish: that is the opposition surge.</p>
+    </div>
+
+    <div class="rig">
+      <div class="rig__bar">
+        <div class="seg" role="group" aria-label="Body">
+          <button type="button" data-body="moon" aria-pressed="true">Moon</button>
+          <button type="button" data-body="ceres" aria-pressed="false">Ceres</button>
+        </div>
+        <div class="seg" role="group" aria-label="Terrain">
+          <button type="button" data-terrain="smooth" aria-pressed="false">Smooth sphere</button>
+          <button type="button" data-terrain="dem" aria-pressed="true">Real terrain</button>
+        </div>
+        <label class="ctrl ctrl--inline" for={phase.id} title={phase.hint}>
+          <span class="ctrl__lab">{phase.label}</span>
+          <input type="range" id={phase.id} name={phase.name} min={phase.min} max={phase.max} step={phase.step} value={phase.value} />
+          <output for={phase.id} class="mono accent">{phase.value}°</output>
+        </label>
+      </div>
+
+      <div class="rig__views">
+        <figure class="vp">
+          <div class="vp__box">
+            <canvas data-hapke-canvas class="hapke-canvas" aria-label="Body rendered with the Hapke model. Click to choose the zoom patch." data-cursor="Pick"></canvas>
+            <span class="marker" data-marker aria-hidden="true"></span>
+          </div>
+          <figcaption class="mono muted"><b>Body</b> · click to pick a patch</figcaption>
+        </figure>
+        <figure class="vp">
+          <div class="vp__box">
+            <canvas data-macro-canvas class="macro-canvas" aria-label="Zoomed terrain patch. Drag to move the Sun." data-cursor="Sun"></canvas>
+            <span class="sundot" data-sun aria-hidden="true"></span>
+          </div>
+          <figcaption class="mono muted"><b>Zoom</b> · drag to move the Sun · <span data-macro-readout></span></figcaption>
+        </figure>
+        <figure class="vp">
+          <div class="vp__box">
+            <canvas data-grain-canvas class="grain-canvas" aria-label="Microscopic view of packed regolith grains"></canvas>
+          </div>
+          <figcaption class="mono muted"><b>Grain</b> · ≈ 0.7 mm wide, illustrative</figcaption>
+        </figure>
+      </div>
+
+      <div class="panel">
+        <div class="panel__main">
+          <div class="tabs" role="tablist" aria-label="Settings">
+            <button type="button" role="tab" data-tab="hapke" aria-selected="true">Hapke model</button>
+            <button type="button" role="tab" data-tab="view" aria-selected="false">Sun &amp; view</button>
+            <button type="button" role="tab" data-tab="terrain" aria-selected="false">Terrain</button>
+            <button type="button" class="tabs__reset mono" data-reset title="Restore the Moon or Ceres starting values">Reset</button>
+          </div>
+
+          <div class="pane" role="tabpanel" data-pane="hapke">
+            <div class="pane__grid">
+              {groups.hapke.map((s) => (
+                <label class="ctrl" for={s.id}>
+                  <span class="ctrl__top"><span>{s.label}</span><output for={s.id} class="mono accent">{s.value}</output></span>
+                  <input type="range" id={s.id} name={s.name} min={s.min} max={s.max} step={s.step} value={s.value} />
+                  <span class="ctrl__hint muted">{s.hint}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div class="pane" role="tabpanel" data-pane="view" hidden>
+            <div class="pane__grid">
+              {groups.view.map((s) => (
+                <label class="ctrl" for={s.id}>
+                  <span class="ctrl__top"><span>{s.label}</span><output for={s.id} class="mono accent">{s.value}</output></span>
+                  <input type="range" id={s.id} name={s.name} min={s.min} max={s.max} step={s.step} value={s.value} />
+                  <span class="ctrl__hint muted">{s.hint}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div class="pane" role="tabpanel" data-pane="terrain" hidden>
+            <div class="pane__grid">
+              {groups.terrain.map((s) => (
+                <label class="ctrl" for={s.id}>
+                  <span class="ctrl__top"><span>{s.label}</span><output for={s.id} class="mono accent">{s.value}</output></span>
+                  <input type="range" id={s.id} name={s.name} min={s.min} max={s.max} step={s.step} value={s.value} />
+                  <span class="ctrl__hint muted">{s.hint}</span>
+                </label>
+              ))}
+              <div class="opts">
+                <label><input type="checkbox" data-opt="shadow" checked /> Cast shadows</label>
+                <label><input type="checkbox" data-opt="albedo" checked /> Albedo map</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="plot">
+          <p class="mono muted">Disc-integrated phase curve</p>
+          <canvas data-hapke-plot class="plot__canvas" aria-label="Phase curve plot"></canvas>
+          <p class="mono muted plot__readout" data-hapke-readout></p>
+        </aside>
+      </div>
+    </div>
+
+    <details class="eq">
+      <summary class="mono">The equation</summary>
+      <div class="eq__main" set:html={eqMain} />
+      <p class="muted eq__sub">Here <span set:html={tex('i')} /> is the incidence angle, <span set:html={tex('e')} /> the emission angle and <span set:html={tex('g')} /> the phase angle, with <span set:html={tex(String.raw`\mu_0=\cos i`)} /> and <span set:html={tex(String.raw`\mu=\cos e`)} />. The toy shows the reflectance factor <span set:html={eqIF} />.</p>
+      <div class="eq__defs">
+        {eqDefs.map((d) => (
+          <div class="eq__def">
+            <p class="mono muted">{d.name}</p>
+            <div set:html={d.html} />
+            <p class="muted eq__note">{d.note}</p>
+          </div>
+        ))}
+      </div>
+      <p class="muted eq__sub">This is the simplified, single-wavelength form, good for intuition. Real fitting (like my Ceres work) uses the full model with the proper H-function and roughness integrals. In the grain view the opposition and roughness terms are dropped: they emerge from the explicit shadows.</p>
+    </details>
+  </section>
+
+  <!-- Spectrum -->
+  <section class="wrap toy toy--next" data-spectrum>
+    <div class="toy__head" data-reveal>
+      <span class="mono accent">Toy 02</span>
+      <h2 class="display-m">Fingerprints in the infrared</h2>
+      <p class="muted">Minerals absorb light at specific wavelengths. Slide through the spectrum to find the bands planetary scientists look for. Then switch <strong>thermal emission</strong> on: past ~2.5 µm the sunlit surface glows with its own heat and can bury the 3 µm water/OH band. Removing that glow is what thermal correction does.</p>
+    </div>
+    <div class="spec">
+      <canvas data-spec-canvas class="spec__canvas" aria-label="Reflectance spectra plot"></canvas>
+      <div class="spec__bar">
+        <span class="spec__swatch" data-spec-swatch aria-hidden="true"></span>
+        <input type="range" data-spec-slider min="0.4" max="3.6" step="0.005" value="0.95" aria-label="Wavelength" />
+      </div>
+      <pre class="mono spec__readout" data-spec-readout></pre>
+      <div class="spec__opts">
+        <label><input type="checkbox" data-spec-body="highland" checked /> Lunar highland</label>
+        <label><input type="checkbox" data-spec-body="mare" checked /> Lunar mare</label>
+        <label><input type="checkbox" data-spec-body="ceres" checked /> Ceres</label>
+        <label class="thermal"><input type="checkbox" data-spec-thermal /> Thermal emission</label>
+      </div>
+      <p class="mono muted note">Illustrative synthetic spectra, shaped after published trends. Not real measurements.</p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { initHapke } from '../components/toys/hapke';
+  import { initSpectrum } from '../components/toys/spectrum';
+  let cleanups: (() => void)[] = [];
+  document.addEventListener('astro:page-load', () => {
+    const h = document.querySelector<HTMLElement>('[data-hapke]');
+    const s = document.querySelector<HTMLElement>('[data-spectrum]');
+    if (h) cleanups.push(initHapke(h));
+    if (s) cleanups.push(initSpectrum(s));
+  });
+  document.addEventListener('astro:before-swap', () => { cleanups.forEach((c) => c()); cleanups = []; });
+</script>
+
+<style>
+  .toy { padding-bottom: clamp(44px, 5vw, 72px); }
+  .toy--next { margin-top: 0; padding-top: clamp(36px, 4vw, 60px); border-top: 1px solid var(--line); }
+  .toy__head { max-width: 760px; margin-bottom: 48px; }
+  .toy__head h2 { margin: 12px 0 20px; }
+  .hapke-canvas {
+    width: 100%; aspect-ratio: 1; border-radius: var(--radius); background: #050506; border: 1px solid var(--line);
+    cursor: crosshair; touch-action: none;
+  }
+  .marker { position: absolute; transform: translate(-50%, -50%); border: 1.5px solid var(--accent); border-radius: 3px; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,0.5); }
+  .marker { position: absolute; transform: translate(-50%, -50%); border: 1.5px solid var(--accent); border-radius: 3px; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,0.5); }
+  .sundot { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px rgba(0,0,0,0.55), 0 0 18px 4px var(--accent); pointer-events: none; }
+  .rig { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: clamp(14px, 2vw, 24px); display: grid; gap: 20px; }
+  .rig__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  .rig__views { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(10px, 2vw, 24px); }
+  .vp { margin: 0; display: grid; justify-items: center; gap: 8px; }
+  .vp__box { position: relative; width: min(100%, 36vh); aspect-ratio: 1; }
+  .vp__box canvas { width: 100%; height: 100%; display: block; aspect-ratio: auto; border-radius: var(--radius); background: #050506; border: 1px solid var(--line); touch-action: none; cursor: crosshair; }
+  .vp figcaption { font-size: 11px; text-transform: none; letter-spacing: 0; text-align: center; }
+  .vp figcaption b { color: var(--text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+  .rig .ctrl--inline { display: flex; align-items: center; gap: 12px; flex: 1 1 260px; min-width: 220px; }
+  .ctrl--inline .ctrl__lab { font-size: 14px; white-space: nowrap; }
+  .ctrl--inline output { min-width: 4ch; text-align: right; }
+  .panel { display: grid; grid-template-columns: 1fr minmax(260px, 340px); gap: clamp(20px, 3vw, 44px); border-top: 1px solid var(--line); padding-top: 14px; align-items: start; }
+  .tabs { display: flex; align-items: flex-end; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+  .tabs button { font: inherit; font-size: 14px; color: var(--muted); background: none; border: 0; padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.3s; }
+  .tabs button:hover { color: var(--text); }
+  .tabs button[aria-selected='true'] { color: var(--text); border-bottom-color: var(--accent); }
+  .tabs .tabs__reset { margin-left: auto; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pane[hidden] { display: none; }
+  .pane__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px clamp(20px, 3vw, 40px); }
+  .pane__grid .opts { grid-column: 1 / -1; }
+  .panel .plot { border-top: 0; padding-top: 0; }
+  .plot__readout { margin-top: 8px; text-transform: none; letter-spacing: 0; }
+  @media (max-width: 900px) { .panel { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .pane__grid { grid-template-columns: 1fr; } .vp__box { width: min(100%, 30vh); } .tabs button { padding: 10px 10px; } }
+  .toy__readout { margin-top: 8px; text-transform: none; letter-spacing: 0; }
+  .toy__controls { display: grid; gap: 22px; }
+  .ctrl { display: grid; gap: 8px; }
+  .ctrl__top { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+  .ctrl__hint { font-size: 13px; }
+  input[type='range'] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; cursor: pointer; }
+  input[type='range']::-webkit-slider-runnable-track { height: 2px; background: var(--line-strong); }
+  input[type='range']::-moz-range-track { height: 2px; background: var(--line-strong); }
+  input[type='range']::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -7px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent); }
+  input[type='range']::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--accent); }
+  .seg { display: inline-grid; grid-auto-flow: column; border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px; width: fit-content; }
+  .seg button { font: inherit; font-size: 14px; color: var(--muted); background: none; border: 0; padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: background 0.3s, color 0.3s; }
+  .seg button[aria-pressed='true'] { background: var(--accent); color: #000; }
+  .opts { display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: 15px; }
+  .opts label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .opts input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .plot { border-top: 1px solid var(--line); padding-top: 18px; }
+  .plot__canvas { width: 100%; height: 200px; margin-top: 10px; }
+  .eq { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .eq summary { cursor: pointer; }
+  .eq p { margin-top: 14px; font-size: 15px; }
+  .eq__main { margin-top: 18px; overflow-x: auto; }
+  .eq__main .katex-display, .eq__def .katex-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+  .eq__main .katex { font-size: 1.3em; }
+  .eq__defs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px clamp(20px, 3vw, 44px); margin-top: 24px; }
+  .eq__def { border-top: 1px solid var(--line); padding-top: 14px; }
+  .eq__note { font-size: 13px; margin-top: 6px; }
+  @media (max-width: 800px) { .eq__defs { grid-template-columns: 1fr; } }
+
+  .spec { border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(16px, 2.4vw, 32px); background: var(--surface); }
+  .spec__canvas { width: 100%; height: clamp(280px, 40vw, 440px); }
+  .spec__bar { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+  .spec__swatch { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--line-strong); }
+  .spec__readout { margin: 14px 0; white-space: pre-wrap; font-size: 12px; min-height: 3em; }
+  .spec__opts { display: flex; flex-wrap: wrap; gap: 10px 24px; font-size: 15px; }
+  .spec__opts label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .spec__opts input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .thermal { color: var(--accent); }
+  .note { margin-top: 18px; text-transform: none; letter-spacing: 0; }
+</style>

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+Resume/
+.claude/settings.local.json
+.env
+*.log

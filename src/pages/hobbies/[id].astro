@@ -1,0 +1,123 @@
+---
+import Base from '../../layouts/Base.astro';
+import Media from '../../components/Media.astro';
+import { getCollection } from 'astro:content';
+import { getImage } from 'astro:assets';
+import 'photoswipe/style.css';
+
+export async function getStaticPaths() {
+  const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.data.order);
+  return albums.map((entry, i) => ({ params: { id: entry.id }, props: { entry, next: albums[(i + 1) % albums.length] } }));
+}
+const { entry, next } = Astro.props;
+const d = entry.data;
+const ratioCss = { portrait: '4 / 5', landscape: '3 / 2', square: '1 / 1' } as const;
+
+const items = await Promise.all(
+  d.items.map(async (it) => {
+    const full = it.src ? await getImage({ src: it.src, width: Math.min(it.src.width, 2400) }) : null;
+    return { ...it, full };
+  }),
+);
+---
+<Base title={d.title} description={d.intro}>
+  <header class="wrap ahead">
+    <a href="/hobbies" class="mono muted link back" data-reveal data-immediate>← Hobbies</a>
+    <p class="eyebrow" data-reveal data-immediate>{d.kicker}</p>
+    <h1 class="display-xl" data-split data-immediate>{d.title}</h1>
+    <div class="ahead__row">
+      <p class="lead muted" data-reveal data-immediate data-delay="0.3">{d.intro}</p>
+      {d.gear.length > 0 && (
+        <div data-reveal data-immediate data-delay="0.4">
+          <p class="mono muted">Gear</p>
+          <ul class="gear">{d.gear.map((g) => <li>{g}</li>)}</ul>
+        </div>
+      )}
+    </div>
+  </header>
+
+  <section class="wrap masonry" data-pswp-gallery>
+    {items.map((it, i) => {
+      const inner = (
+        <>
+          <Media src={it.src} alt={it.title} label={it.title} ratio={ratioCss[it.ratio]} sizes="(max-width: 700px) 100vw, 33vw" />
+          <figcaption class="cap">
+            <span class="cap__t">{it.title}</span>
+            <span class="mono muted">{String(i + 1).padStart(2, '0')}</span>
+          </figcaption>
+          {Object.keys(it.meta).length > 0 && (
+            <dl class="exif">
+              {Object.entries(it.meta).map(([k, v]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+            </dl>
+          )}
+        </>
+      );
+      return it.full ? (
+        <figure class="tile" data-reveal>
+          <a href={it.full.src} data-pswp-width={it.full.attributes.width} data-pswp-height={it.full.attributes.height} data-caption={it.caption ?? it.title} data-cursor="Zoom" target="_blank">{inner}</a>
+        </figure>
+      ) : (
+        <figure class="tile" data-reveal data-hover>{inner}</figure>
+      );
+    })}
+  </section>
+
+  <a href={`/hobbies/${next.id}`} class="wrap nextalb" data-cursor="Next">
+    <span class="mono muted">Next album</span>
+    <span class="display-l">{next.data.title} →</span>
+  </a>
+</Base>
+
+<script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  let lb: PhotoSwipeLightbox | null = null;
+  function init() {
+    if (!document.querySelector('[data-pswp-gallery] a[data-pswp-width]')) return;
+    lb = new PhotoSwipeLightbox({
+      gallery: '[data-pswp-gallery]',
+      children: 'a[data-pswp-width]',
+      bgOpacity: 0.96,
+      pswpModule: () => import('photoswipe'),
+    });
+    lb.on('uiRegister', () => {
+      lb!.pswp?.ui?.registerElement({
+        name: 'caption',
+        order: 9,
+        isButton: false,
+        appendTo: 'root',
+        onInit: (el, pswp) => {
+          pswp.on('change', () => {
+            const a = pswp.currSlide?.data.element as HTMLElement | undefined;
+            el.textContent = a?.dataset.caption ?? '';
+          });
+        },
+      });
+    });
+    lb.init();
+  }
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => { lb?.destroy(); lb = null; });
+</script>
+
+<style>
+  .ahead { padding-top: clamp(130px, 18vw, 220px); padding-bottom: clamp(48px, 7vw, 96px); }
+  .back { display: inline-block; margin-bottom: 40px; text-transform: none; letter-spacing: 0; }
+  .ahead__row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; margin-top: 36px; align-items: start; }
+  .gear { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; }
+  @media (max-width: 800px) { .ahead__row { grid-template-columns: 1fr; } }
+
+  .masonry { columns: 3 320px; column-gap: clamp(16px, 2vw, 28px); }
+  .tile { break-inside: avoid; margin: 0 0 clamp(28px, 3vw, 44px); }
+  .tile a { display: block; }
+  .cap { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
+  .cap__t { font-family: var(--font-display); font-size: 22px; line-height: 1.15; }
+  .exif { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .exif div { display: flex; gap: 6px; }
+  .exif dt { color: var(--faint); }
+  .exif dd { margin: 0; }
+
+  .nextalb { display: flex; flex-direction: column; gap: 12px; padding-block: clamp(80px, 10vw, 140px); border-top: 1px solid var(--line); transition: color 0.3s; }
+  .nextalb:hover { color: var(--accent); }
+
+  :global(.pswp__caption) { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 12px; color: #ecebe6; background: #0009; padding: 8px 14px; border-radius: 999px; }
+</style>

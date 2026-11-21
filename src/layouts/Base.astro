@@ -1,0 +1,81 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource-variable/inter-tight';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Cursor from '../components/Cursor.astro';
+import { site } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  footer?: boolean;
+}
+const { title, description = site.description, image, footer = true } = Astro.props;
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | ${site.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site) : undefined;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      (function () {
+        function apply() {
+          document.documentElement.classList.add('js');
+          var t = null;
+          try { t = localStorage.getItem('theme'); } catch (e) {}
+          if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        }
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
+    <ClientRouter />
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main" class="skip">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    {footer && <Footer />}
+    <Cursor />
+    <div class="grain" aria-hidden="true"></div>
+
+    <script>
+      import { initMotion, destroyMotion } from '../lib/motion';
+      document.addEventListener('astro:page-load', initMotion);
+      document.addEventListener('astro:before-swap', destroyMotion);
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: fixed; left: 16px; top: -60px; z-index: 200;
+    background: var(--accent); color: #0a0a0b; padding: 10px 16px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+  .skip:focus { top: 16px; }
+</style>

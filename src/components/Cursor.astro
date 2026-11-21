@@ -1,0 +1,61 @@
+<div class="cursor" aria-hidden="true" transition:persist="cursor">
+  <div class="cursor__ring"><span class="cursor__label"></span></div>
+  <div class="cursor__dot"></div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const root = document.querySelector<HTMLElement>('.cursor');
+
+  if (fine && root && !root.dataset.bound) {
+    root.dataset.bound = '1';
+    document.documentElement.classList.add('has-cursor');
+    const ring = root.querySelector<HTMLElement>('.cursor__ring')!;
+    const dot = root.querySelector<HTMLElement>('.cursor__dot')!;
+    const label = root.querySelector<HTMLElement>('.cursor__label')!;
+
+    const rx = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3' });
+    const ry = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3' });
+    const dx = gsap.quickTo(dot, 'x', { duration: 0.1 });
+    const dy = gsap.quickTo(dot, 'y', { duration: 0.1 });
+
+    window.addEventListener('pointermove', (e) => {
+      root.classList.add('is-visible');
+      rx(e.clientX); ry(e.clientY); dx(e.clientX); dy(e.clientY);
+    });
+    document.addEventListener('pointerleave', () => root.classList.remove('is-visible'));
+
+    document.addEventListener('pointerover', (e) => {
+      const t = (e.target as HTMLElement).closest<HTMLElement>('a, button, [data-cursor], input, label');
+      if (!t) {
+        root.classList.remove('is-hover', 'is-label');
+        return;
+      }
+      const text = t.dataset.cursor;
+      root.classList.toggle('is-label', !!text);
+      root.classList.toggle('is-hover', !text);
+      label.textContent = text || '';
+    });
+    document.addEventListener('astro:before-swap', () => root.classList.remove('is-hover', 'is-label'));
+  }
+</script>
+
+<style>
+  .cursor { position: fixed; inset: 0; pointer-events: none; z-index: 150; opacity: 0; transition: opacity 0.3s; }
+  .cursor.is-visible { opacity: 1; }
+  .cursor__ring, .cursor__dot { position: fixed; left: 0; top: 0; border-radius: 50%; }
+  .cursor__ring {
+    width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 1px solid var(--text);
+    display: grid; place-items: center; mix-blend-mode: difference;
+    transition: width 0.4s var(--ease), height 0.4s var(--ease), margin 0.4s var(--ease), background 0.4s, border-color 0.4s;
+  }
+  .cursor__dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: var(--accent); }
+  .cursor.is-hover .cursor__ring { width: 64px; height: 64px; margin: -32px 0 0 -32px; background: #fff; border-color: #fff; }
+  .cursor.is-label .cursor__ring { width: 92px; height: 92px; margin: -46px 0 0 -46px; background: var(--accent); border-color: var(--accent); mix-blend-mode: normal; }
+  .cursor__label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #0a0a0b; opacity: 0; transition: opacity 0.3s; }
+  .cursor.is-label .cursor__label { opacity: 1; }
+  .cursor.is-label .cursor__dot, .cursor.is-hover .cursor__dot { opacity: 0; }
+  @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+</style>

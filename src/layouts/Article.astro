@@ -1,0 +1,60 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  back: { href: string; label: string };
+  meta?: { k: string; v: string }[];
+  next?: { href: string; title: string };
+}
+const { title, description, eyebrow, back, meta = [], next } = Astro.props;
+---
+<Base title={title} description={description}>
+  <article class="art">
+    <header class="wrap art__head">
+      <a href={back.href} class="mono muted link art__back" data-reveal data-immediate>← {back.label}</a>
+      <p class="eyebrow" data-reveal data-immediate>{eyebrow}</p>
+      <h1 class="display-l art__title" data-split data-immediate>{title}</h1>
+      <p class="lead muted art__desc" data-reveal data-immediate data-delay="0.3">{description}</p>
+      {meta.length > 0 && (
+        <dl class="art__meta" data-reveal data-immediate data-delay="0.4">
+          {meta.map((m) => (
+            <div><dt class="mono muted">{m.k}</dt><dd>{m.v}</dd></div>
+          ))}
+        </dl>
+      )}
+    </header>
+
+    <slot name="hero" />
+
+    <div class="wrap art__body">
+      <div class="prose" data-reveal>
+        <slot />
+      </div>
+      <aside class="art__aside"><slot name="aside" /></aside>
+    </div>
+
+    {next && (
+      <a href={next.href} class="wrap art__next" data-cursor="Next">
+        <span class="mono muted">Next</span>
+        <span class="display-m">{next.title} →</span>
+      </a>
+    )}
+  </article>
+</Base>
+
+<style>
+  .art__head { padding-top: clamp(130px, 18vw, 220px); padding-bottom: clamp(40px, 6vw, 80px); }
+  .art__back { display: inline-block; margin-bottom: 40px; text-transform: none; letter-spacing: 0; }
+  .art__title { max-width: 16ch; }
+  .art__desc { margin-top: 28px; max-width: 52ch; }
+  .art__meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 48px 0 0; padding-top: 24px; border-top: 1px solid var(--line); }
+  .art__meta dd { margin: 6px 0 0; font-size: 15px; }
+  .art__body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(40px, 6vw, 100px); padding-block: clamp(48px, 7vw, 100px); }
+  .art__aside:empty { display: none; }
+  .art__next { display: flex; flex-direction: column; gap: 12px; padding-block: 80px; border-top: 1px solid var(--line); transition: color 0.3s; }
+  .art__next:hover { color: var(--accent); }
+  @media (max-width: 960px) { .art__body { grid-template-columns: 1fr; } }
+</style>
