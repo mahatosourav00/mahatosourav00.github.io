@@ -21,6 +21,19 @@ const stats = [
 ];
 ---
 <Base>
+  <!-- ───── LOADER (first visit per session) ───── -->
+  <div class="loader" data-loader role="status" aria-live="polite">
+    <div class="loader__inner">
+      <span class="loader__mark">SM<span class="accent">.</span></span>
+      <div class="loader__track"><span class="loader__bar" data-loader-bar></span></div>
+      <span class="mono muted loader__row"><span data-loader-label>Loading the Moon</span><span data-loader-pct>0%</span></span>
+    </div>
+  </div>
+  <script is:inline>
+    try { if (sessionStorage.getItem('portfolio-loaded') === '1') document.querySelector('[data-loader]').remove(); } catch (e) {}
+  </script>
+  <noscript><style>.loader { display: none; }</style></noscript>
+
   <!-- ───── HERO ───── -->
   <section class="hero" data-hero>
     <div class="hero__stage">
@@ -172,15 +185,89 @@ const stats = [
   let globe: Globe | null = null;
   let onScroll: (() => void) | null = null;
 
+  const FLAG = 'portfolio-loaded';
+  const seen = () => { try { return sessionStorage.getItem(FLAG) === '1'; } catch { return false; } };
+  const markSeen = () => { try { sessionStorage.setItem(FLAG, '1'); } catch { /* ignore */ } };
+
+  // Real progress: fonts plus the bytes of the Moon textures, which also warms the cache for the globe.
+  function startLoader() {
+    const el = document.querySelector<HTMLElement>('[data-loader]');
+    if (!el) return null;
+    if (seen()) { el.remove(); return null; }
+    const bar = el.querySelector<HTMLElement>('[data-loader-bar]')!;
+    const pct = el.querySelector<HTMLElement>('[data-loader-pct]')!;
+    const label = el.querySelector<HTMLElement>('[data-loader-label]')!;
+    const parts = { fonts: 0, moon: 0, dem: 0 };
+    const weights = { fonts: 0.15, moon: 0.45, dem: 0.4 };
+    let shown = 0;
+    let finished = false;
+    let raf = 0;
+    const tick = () => {
+      const goal = finished ? 1 : Math.min(parts.fonts * weights.fonts + parts.moon * weights.moon + parts.dem * weights.dem, 0.97);
+      shown += (goal - shown) * 0.14;
+      if (Math.abs(goal - shown) < 0.002) shown = goal;
+      bar.style.transform = `scaleX(${shown})`;
+      pct.textContent = `${Math.round(shown * 100)}%`;
+      label.textContent = shown >= 0.995 ? 'Ready' : parts.fonts < 1 ? 'Loading type' : 'Loading the Moon';
+      raf = shown >= 1 && finished ? 0 : requestAnimationFrame(tick);
+    };
+    tick();
+
+    const wantedFonts = Promise.all([
+      document.fonts.load('400 1em "Instrument Serif"'),
+      document.fonts.load('1em "Inter Tight Variable"'),
+    ]);
+    Promise.race([wantedFonts, new Promise((r) => setTimeout(r, 2500))]).catch(() => {}).then(() => { parts.fonts = 1; });
+
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+    const grab = async (file: string, key: 'moon' | 'dem') => {
+      try {
+        const r = await fetch(`${base}/textures/${file}`);
+        const total = Number(r.headers.get('content-length')) || 0;
+        const reader = r.body?.getReader();
+        if (!reader) { await r.arrayBuffer(); parts[key] = 1; return; }
+        let got = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          got += value.length;
+          if (total) parts[key] = Math.min(got / total, 0.99);
+        }
+      } catch { /* the globe falls back to a procedural surface */ }
+      parts[key] = 1;
+    };
+    grab('moon-2k.jpg', 'moon');
+    grab('moon-dem-2k.jpg', 'dem');
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      finished = true;
+      markSeen();
+      const wait = () => {
+        if (shown < 0.995) return requestAnimationFrame(wait);
+        setTimeout(() => {
+          el.classList.add('is-done');
+          setTimeout(() => { el.remove(); cancelAnimationFrame(raf); }, 900);
+        }, 250);
+      };
+      wait();
+    };
+    setTimeout(finish, 9000); // never trap the visitor behind the loader
+    return { finish };
+  }
+
   async function init() {
     const canvas = document.querySelector<HTMLCanvasElement>('[data-globe]');
     const hero = document.querySelector<HTMLElement>('[data-hero]');
     if (!canvas || !hero) return;
 
+    const loader = startLoader();
     const { createGlobe } = await import('../lib/globe');
     globe = createGlobe(canvas);
-    if (!globe) hero.classList.add('no-webgl');
-    else globe.ready.then(() => requestAnimationFrame(() => hero.classList.add('is-ready')));
+    if (!globe) { hero.classList.add('no-webgl'); loader?.finish(); }
+    else globe.ready.then(() => requestAnimationFrame(() => { hero.classList.add('is-ready'); loader?.finish(); }));
 
     const story = hero.querySelector<HTMLElement>('[data-story]');
     const name = hero.querySelector<HTMLElement>('[data-body-name]');
@@ -233,6 +320,13 @@ const stats = [
 </script>
 
 <style>
+  .loader { position: fixed; inset: 0; z-index: 200; background: var(--bg); display: grid; place-items: center; transition: opacity 0.8s var(--ease), visibility 0.8s; }
+  .loader.is-done { opacity: 0; visibility: hidden; }
+  .loader__inner { width: min(280px, 70vw); display: grid; gap: 22px; justify-items: stretch; }
+  .loader__mark { font-family: var(--font-display); font-size: 56px; line-height: 1; letter-spacing: -0.02em; text-align: center; }
+  .loader__track { height: 1px; background: var(--line-strong); overflow: hidden; }
+  .loader__bar { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+  .loader__row { display: flex; justify-content: space-between; text-transform: none; letter-spacing: 0.02em; }
   /* Hero */
   .hero { position: relative; height: 230vh; height: 230svh; }
   .hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
