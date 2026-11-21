@@ -123,29 +123,38 @@ const fragment = /* glsl */ `
   void main() {
     vec3 p = normalize(vObj);
 
-    // ---- Procedural fallback surface ----
-    vec3 up = abs(p.y) < 0.99 ? vec3(0, 1, 0) : vec3(1, 0, 0);
-    vec3 t = normalize(cross(up, p));
-    vec3 b = cross(p, t);
-    float e = 0.0025;
-    float h0 = height(p);
-    float ht = height(normalize(p + t * e));
-    float hb = height(normalize(p + b * e));
-    float pbump = mix(0.9, 0.5, uMix);
-    vec3 nProc = normalize(p - pbump * ((ht - h0) / e * t + (hb - h0) / e * b) * 0.05);
-    float maria = smoothstep(0.40, 0.56, fbm(p * 1.1 + 3.0));
-    float moonAlb = mix(0.66, 0.24, maria) + (fbm(p * 12.0) - 0.5) * 0.12;
-    vec3 moonProc = vec3(moonAlb) * vec3(1.0, 0.985, 0.96);
-    float ceresAlb = 0.2 + (fbm(p * 3.0) - 0.5) * 0.1;
-    vec3 ceresProc = vec3(ceresAlb) * vec3(1.0, 0.92, 0.82);
+    // ---- Procedural fallback surface (only when a texture is missing) ----
+    vec3 nProc = p;
+    vec3 moonProc = vec3(0.5);
+    vec3 ceresProc = vec3(0.2);
+    if (min(min(uHasMoon, uHasCeres), min(uHasMoonH, uHasCeresH)) < 0.5) {
+      vec3 up = abs(p.y) < 0.99 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+      vec3 t = normalize(cross(up, p));
+      vec3 b = cross(p, t);
+      float e = 0.0025;
+      float h0 = height(p);
+      float ht = height(normalize(p + t * e));
+      float hb = height(normalize(p + b * e));
+      float pbump = mix(0.9, 0.5, uMix);
+      nProc = normalize(p - pbump * ((ht - h0) / e * t + (hb - h0) / e * b) * 0.05);
+      float maria = smoothstep(0.40, 0.56, fbm(p * 1.1 + 3.0));
+      float moonAlb = mix(0.66, 0.24, maria) + (fbm(p * 12.0) - 0.5) * 0.12;
+      moonProc = vec3(moonAlb) * vec3(1.0, 0.985, 0.96);
+      float ceresAlb = 0.2 + (fbm(p * 3.0) - 0.5) * 0.1;
+      ceresProc = vec3(ceresAlb) * vec3(1.0, 0.92, 0.82);
+    }
 
-    // ---- Real imagery ----
+    // ---- Real imagery: only sample the body that is actually visible ----
     vec3 nMoon = nProc; vec3 nCeres = nProc;
     vec3 moonCol = moonProc; vec3 ceresCol = ceresProc;
-    if (uHasMoon > 0.5) moonCol = sampleMap(uMoonTex, p, 1.0 / 2048.0, 0.012, 1.0, 1.3, nMoon);
-    if (uHasMoonH > 0.5) nMoon = demNormal(uMoonH, p, nMoon, 8.0);
-    if (uHasCeres > 0.5) ceresCol = sampleMap(uCeresTex, p, 1.0 / 2048.0, 0.02, 1.25, 2.2, nCeres);
-    if (uHasCeresH > 0.5) nCeres = demNormal(uCeresH, p, nCeres, 16.0);
+    if (uMix < 0.999) {
+      if (uHasMoon > 0.5) moonCol = sampleMap(uMoonTex, p, 1.0 / 2048.0, 0.012, 1.0, 1.3, nMoon);
+      if (uHasMoonH > 0.5) nMoon = demNormal(uMoonH, p, nMoon, 8.0);
+    }
+    if (uMix > 0.001) {
+      if (uHasCeres > 0.5) ceresCol = sampleMap(uCeresTex, p, 1.0 / 2048.0, 0.02, 1.25, 2.2, nCeres);
+      if (uHasCeresH > 0.5) nCeres = demNormal(uCeresH, p, nCeres, 16.0);
+    }
 
     vec3 albedo = mix(moonCol, ceresCol, uMix);
     vec3 nObj = normalize(mix(nMoon, nCeres, uMix));
@@ -191,8 +200,11 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
   const { stars = true, interactive = true } = opts;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  // Phones: fewer pixels and vertices, no MSAA. Everything adapts further below if frames run slow.
+  const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, alpha: true, powerPreference: 'high-performance' });
+  let pixelRatio = Math.min(window.devicePixelRatio, coarse ? 1.25 : 1.75);
+  renderer.setPixelRatio(pixelRatio);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
   camera.position.set(0, 0, 6);
@@ -244,7 +256,7 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
     loadTex('ceres-dem-2k.jpg', 'uCeresH', 'uHasCeresH');
   });
   const ready = Promise.race([moonLoaded, new Promise<void>((res) => setTimeout(res, 3500))]);
-  const geo = new THREE.SphereGeometry(1, 256, 256);
+  const geo = new THREE.SphereGeometry(1, coarse ? 128 : 256, coarse ? 128 : 256);
   const mat = new THREE.ShaderMaterial({ vertexShader: vertex, fragmentShader: fragment, uniforms });
   const body = new THREE.Mesh(geo, mat);
   body.rotation.z = 0.12;
@@ -321,12 +333,25 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
 
   const clock = new THREE.Clock();
   let raf = 0;
+  let frameAcc = 0, frameCount = 0, warm = 0;
   const m4 = new THREE.Matrix4();
   const loop = () => {
     raf = requestAnimationFrame(loop);
     if (!visible || document.hidden) return;
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const raw = clock.getDelta();
+    const dt = Math.min(raw, 0.05);
     uniforms.uTime.value += dt;
+
+    // Dynamic resolution: if frames are consistently slow, drop the render resolution a step (never raises it again)
+    frameAcc += raw; frameCount++;
+    if (frameCount >= 40) {
+      if (warm++ > 0 && frameAcc / frameCount > 0.027 && pixelRatio > 0.8) {
+        pixelRatio = Math.max(0.75, pixelRatio - 0.25);
+        renderer.setPixelRatio(pixelRatio);
+        resize();
+      }
+      frameAcc = 0; frameCount = 0;
+    }
 
     pointer.x += (pointer.tx - pointer.x) * 0.05;
     pointer.y += (pointer.ty - pointer.y) * 0.05;

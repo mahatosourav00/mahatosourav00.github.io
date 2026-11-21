@@ -184,6 +184,7 @@ const stats = [
 
   let globe: Globe | null = null;
   let onScroll: (() => void) | null = null;
+  let onMeasure: (() => void) | null = null;
 
   const FLAG = 'portfolio-loaded';
   const seen = () => { try { return sessionStorage.getItem(FLAG) === '1'; } catch { return false; } };
@@ -274,9 +275,14 @@ const stats = [
     const radius = hero.querySelector<HTMLElement>('[data-body-r]');
     let lastCeres: boolean | null = null;
 
+    let total = hero.offsetHeight - window.innerHeight;
+    onMeasure = () => { total = hero.offsetHeight - window.innerHeight; };
+    window.addEventListener('resize', onMeasure, { passive: true });
+    let lastP = -1;
     onScroll = () => {
-      const total = hero.offsetHeight - window.innerHeight;
       const p = Math.min(1, Math.max(0, window.scrollY / Math.max(total, 1)));
+      if (Math.abs(p - lastP) < 0.0004) return;
+      lastP = p;
       globe?.setScroll(p);
       globe?.setMix((p - 0.25) / 0.45);
       hero.style.setProperty('--p', p.toFixed(3));
@@ -312,7 +318,9 @@ const stats = [
     globe?.destroy();
     globe = null;
     if (onScroll) window.removeEventListener('scroll', onScroll);
+    if (onMeasure) window.removeEventListener('resize', onMeasure);
     onScroll = null;
+    onMeasure = null;
   }
 
   document.addEventListener('astro:page-load', init);
