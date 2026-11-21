@@ -2,7 +2,7 @@
 export const site = {
   name: 'Sourav Mahato',
   short: 'SM',
-  role: 'Planetary scientist & instrument builder',
+  role: 'Planetary researcher & instrument builder',
   tagline: 'I figure out how things work, from rocks floating in space to circuit boards on my desk.',
   description:
     'Sourav Mahato: planetary science researcher working on Chandrayaan-2 and Dawn spectroscopy, and a builder of low-cost scientific instruments. Open to PhD positions.',
