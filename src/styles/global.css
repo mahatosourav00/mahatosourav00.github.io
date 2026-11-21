@@ -124,6 +124,7 @@ p { margin: 0 0 1em; }
 }
 
 /* ───────────── Reveal states (JS adds .is-in) ───────────── */
+.js:not(.fonts-ready) [data-split] { visibility: hidden; }
 .js [data-reveal] { opacity: 0; transform: translateY(28px); }
 .js [data-reveal-img] { clip-path: inset(100% 0 0 0); }
 .split-line { overflow: hidden; display: block; padding-bottom: 0.08em; margin-bottom: -0.08em; }

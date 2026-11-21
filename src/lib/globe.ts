@@ -236,15 +236,16 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
       () => resolve(), // keep the procedural fallback
     ));
   // Resolves when both textures are in (or failed / timed out), so the page can fade the globe in without a pop
-  const ready = Promise.race([
-    Promise.all([
-      loadTex('moon-2k.jpg', 'uMoonTex', 'uHasMoon'),
-      loadTex('ceres-2k.jpg', 'uCeresTex', 'uHasCeres'),
-      loadTex('moon-dem-2k.jpg', 'uMoonH', 'uHasMoonH'),
-      loadTex('ceres-dem-2k.jpg', 'uCeresH', 'uHasCeresH'),
-    ]).then(() => {}),
-    new Promise<void>((res) => setTimeout(res, 4000)),
-  ]);
+  const moonLoaded = Promise.all([
+    loadTex('moon-2k.jpg', 'uMoonTex', 'uHasMoon'),
+    loadTex('moon-dem-2k.jpg', 'uMoonH', 'uHasMoonH'),
+  ]).then(() => {});
+  // Ceres is only needed once the user scrolls, so it loads after the Moon and never blocks the first paint
+  moonLoaded.then(() => {
+    loadTex('ceres-2k.jpg', 'uCeresTex', 'uHasCeres');
+    loadTex('ceres-dem-2k.jpg', 'uCeresH', 'uHasCeresH');
+  });
+  const ready = Promise.race([moonLoaded, new Promise<void>((res) => setTimeout(res, 3500))]);
   const geo = new THREE.SphereGeometry(1, 256, 256);
   const mat = new THREE.ShaderMaterial({ vertexShader: vertex, fragmentShader: fragment, uniforms });
   const body = new THREE.Mesh(geo, mat);

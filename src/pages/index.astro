@@ -238,7 +238,7 @@ const stats = [
   .hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
   .hero__canvas {
     position: absolute; top: 50%; left: 62%; width: min(78vh, 62vw); aspect-ratio: 1; height: auto;
-    transform: translate(-50%, -50%) translateX(calc(var(--p, 0) * -12vw)) scale(calc(1 + var(--p, 0) * 0.15));
+    transform: translate(-50%, -50%) translateX(calc(var(--p, 0) * 10vw)) scale(calc(1 + var(--p, 0) * 0.12));
     opacity: 0; transition: opacity 1.6s var(--ease); touch-action: pan-y; cursor: grab;
   }
   .hero__canvas:active { cursor: grabbing; }
@@ -265,6 +265,7 @@ const stats = [
   .hero__story {
     position: absolute; left: var(--gutter); bottom: 22%; max-width: min(560px, 80vw);
     opacity: 0; transform: translateY(30px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    text-shadow: 0 2px 24px var(--bg), 0 0 2px var(--bg);
   }
   .hero__story.is-on { opacity: 1; transform: none; }
   .hero:has(.is-on) .hero__title-wrap { opacity: 0; transform: translateY(-40px); }
@@ -278,6 +279,7 @@ const stats = [
     .hero.is-ready .hero__canvas { opacity: 0.6; }
     .hero__canvas { transform: translate(-50%, -50%) scale(calc(1 + var(--p, 0) * 0.1)); }
     .hide-sm { display: none; }
+    .hero__title-wrap { text-shadow: 0 2px 30px var(--bg); }
   }
 
   /* About */

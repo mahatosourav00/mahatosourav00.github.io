@@ -5,6 +5,10 @@ import '@fontsource/instrument-serif/400-italic.css';
 import '@fontsource-variable/inter-tight';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/global.css';
+import serifUrl from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import serifItalicUrl from '@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url';
+import interUrl from '@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url';
+import monoUrl from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import Cursor from '../components/Cursor.astro';
@@ -51,6 +55,27 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
       })();
     </script>
     <ClientRouter />
+    <link rel="preload" as="font" type="font/woff2" href={serifUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={serifItalicUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={interUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={monoUrl} crossorigin />
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var done = function () { d.classList.add('fonts-ready'); };
+        if (document.fonts && document.fonts.load) {
+          Promise.race([
+            Promise.all([
+              document.fonts.load('400 1em "Instrument Serif"'),
+              document.fonts.load('italic 400 1em "Instrument Serif"'),
+              document.fonts.load('1em "Inter Tight Variable"'),
+            ]),
+            new Promise(function (r) { setTimeout(r, 2500); }),
+          ]).then(done, done);
+        } else { done(); }
+      })();
+    </script>
     <slot name="head" />
   </head>
   <body>

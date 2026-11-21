@@ -165,10 +165,19 @@ export function initMotion() {
   window.removeEventListener('resize', onResize);
   window.addEventListener('resize', onResize);
   // Wait for fonts so line splits are measured correctly
-  document.fonts.ready.then(() => {
-    initReveals();
-    ScrollTrigger.refresh();
-  });
+  const wanted = Promise.all([
+    document.fonts.load('400 1em "Instrument Serif"'),
+    document.fonts.load('italic 400 1em "Instrument Serif"'),
+    document.fonts.load('1em "Inter Tight Variable"'),
+  ]);
+  Promise.race([wanted, new Promise((r) => setTimeout(r, 2500))])
+    .catch(() => {})
+    .then(() => document.fonts.ready)
+    .then(() => {
+      document.documentElement.classList.add('fonts-ready');
+      initReveals();
+      ScrollTrigger.refresh();
+    });
 }
 
 export function destroyMotion() {
