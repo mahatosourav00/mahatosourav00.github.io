@@ -163,9 +163,7 @@ const fragment = /* glsl */ `
     vec3 col = albedo * I;
     // Faint earthshine on night side
     col += albedo * 0.025 * (1.0 - smoothstep(0.0, 0.2, mu0));
-    // Rim light
-    float fres = pow(1.0 - mu, 4.0);
-    col += uRim * fres * 0.18 * smoothstep(-0.2, 0.4, dot(normalize(uRot * p), L));
+    // No rim glow: these bodies are airless, and an amber rim lit up the terrain contours near the limb.
 
     col = pow(col, vec3(1.0 / 2.2));
     gl_FragColor = vec4(col, 1.0);
