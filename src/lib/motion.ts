@@ -85,7 +85,16 @@ function splitLines(el: HTMLElement): HTMLElement[] {
     inner.className = 'split-inner';
     inner.style.display = 'block';
     inner.style.whiteSpace = 'nowrap';
-    inner.appendChild(range.cloneContents());
+    let content: Node = range.cloneContents();
+    // cloneContents drops ancestors shared by the whole range: when a line sits entirely inside <em>/.accent,
+    // re-wrap it in shallow clones of those ancestors so the styling carries over to every line.
+    for (let p: Node | null = range.commonAncestorContainer; p && p !== el; p = p.parentNode) {
+      if (p.nodeType !== Node.ELEMENT_NODE) continue;
+      const clone = (p as Element).cloneNode(false);
+      clone.appendChild(content);
+      content = clone;
+    }
+    inner.appendChild(content);
     const wrap = document.createElement('span');
     wrap.className = 'split-line';
     wrap.appendChild(inner);
