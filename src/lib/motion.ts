@@ -1,7 +1,7 @@
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import SplitType from 'split-type';
+type SplitType = { lines: HTMLElement[]; revert: () => void };
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,17 +54,46 @@ export function disableSmoothScroll() {
   ScrollTrigger.refresh();
 }
 
-function splitLines(el: HTMLElement) {
-  const s = new SplitType(el, { types: 'lines', lineClass: 'split-inner' });
-  s.lines?.forEach((line) => {
+// Split an element into its visual lines. Line breaks are measured on the element's real, natural text flow
+// (SplitType measured words as inline-blocks, which wrapped differently and pushed yellow italic phrases to a new line),
+// then each line is cut out with a Range so nested elements (<em>, .accent, links) stay intact and inline.
+function splitLines(el: HTMLElement): HTMLElement[] {
+  const original = el.innerHTML;
+  const range = document.createRange();
+  const words: { node: Text; start: number; end: number; top: number }[] = [];
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode() as Text | null; n; n = walker.nextNode() as Text | null) {
+    for (const m of n.data.matchAll(/\S+/g)) {
+      range.setStart(n, m.index!);
+      range.setEnd(n, m.index! + m[0].length);
+      const rects = range.getClientRects();
+      if (rects.length) words.push({ node: n, start: m.index!, end: m.index! + m[0].length, top: rects[0].top });
+    }
+  }
+  if (!words.length) return [];
+  const groups: (typeof words)[] = [];
+  for (const w of words) {
+    const g = groups[groups.length - 1];
+    if (g && Math.abs(g[0].top - w.top) < 4) g.push(w);
+    else groups.push([w]);
+  }
+  const lines = groups.map((g) => {
+    range.setStart(g[0].node, g[0].start);
+    const last = g[g.length - 1];
+    range.setEnd(last.node, last.end);
+    const inner = document.createElement('div');
+    inner.className = 'split-inner';
+    inner.style.display = 'block';
+    inner.style.whiteSpace = 'nowrap';
+    inner.appendChild(range.cloneContents());
     const wrap = document.createElement('span');
     wrap.className = 'split-line';
-    line.parentNode?.insertBefore(wrap, line);
-    wrap.appendChild(line);
-    (line as HTMLElement).style.display = 'block';
+    wrap.appendChild(inner);
+    return { wrap, inner };
   });
-  splits.push(s);
-  return s.lines ?? [];
+  el.replaceChildren(...lines.map((l) => l.wrap));
+  splits.push({ lines: lines.map((l) => l.inner), revert: () => { el.innerHTML = original; } });
+  return lines.map((l) => l.inner);
 }
 
 function initReveals() {
