@@ -1,7 +1,8 @@
 ---
 title: "Festivals & Rituals"
 kicker: "Culture"
-order: 4
+parent: photography
+order: 3
 intro: "Chhau dance, village festivals, ghats and weddings: the colour and noise of eastern India, photographed up close."
 gear: []
 items:

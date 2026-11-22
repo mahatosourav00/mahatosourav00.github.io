@@ -1,7 +1,8 @@
 ---
 title: "Street & People"
 kicker: "People & places"
-order: 3
+parent: photography
+order: 2
 intro: "Old lanes, village walls, railway platforms and the people in them. Mostly walking around with one lens and waiting for the light to do something."
 gear: []
 items:

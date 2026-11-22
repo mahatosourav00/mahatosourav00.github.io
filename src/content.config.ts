@@ -54,6 +54,7 @@ const albums = defineCollection({
     z.object({
       title: z.string(),
       kicker: z.string(),
+      parent: z.string().optional(),
       order: z.number(),
       intro: z.string(),
       cover: image().optional(),

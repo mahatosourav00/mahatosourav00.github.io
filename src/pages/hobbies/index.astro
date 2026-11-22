@@ -4,7 +4,9 @@ import PageHeader from '../../components/PageHeader.astro';
 import Media from '../../components/Media.astro';
 import { getCollection } from 'astro:content';
 
-const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.data.order);
+const allAlbums = await getCollection('albums');
+const albums = allAlbums.filter((a) => !a.data.parent).sort((a, b) => a.data.order - b.data.order);
+const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allAlbums.filter((c) => c.data.parent === a.id).reduce((n, c) => n + c.data.items.length, 0);
 ---
 <Base title="Hobbies" description="Astrophotography, photography and 3D printing by Sourav Mahato.">
   <PageHeader
@@ -22,7 +24,7 @@ const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.d
           <span class="mono accent">{a.data.kicker}</span>
           <h2 class="display-l door__title">{a.data.title}</h2>
           <p class="muted door__intro">{a.data.intro}</p>
-          <span class="mono muted">{a.data.items.length} frames →</span>
+          <span class="mono muted">{frameCount(a)} frames →</span>
         </div>
         <div class="door__media">
           <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio="4 / 3" />

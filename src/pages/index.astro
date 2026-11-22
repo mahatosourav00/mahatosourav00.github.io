@@ -7,7 +7,9 @@ import { site } from '../lib/site';
 
 const research = (await getCollection('research')).filter((r) => r.data.featured).sort((a, b) => a.data.order - b.data.order);
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const albums = (await getCollection('albums')).sort((a, b) => a.data.order - b.data.order);
+const allAlbums = await getCollection('albums');
+const albums = allAlbums.filter((a) => !a.data.parent).sort((a, b) => a.data.order - b.data.order);
+const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allAlbums.filter((c) => c.data.parent === a.id).reduce((n, c) => n + c.data.items.length, 0);
 const pubs = (await getCollection('publications'))
   .filter((p) => p.data.type === 'paper' || p.data.type === 'talk')
   .sort((a, b) => parseInt(b.data.year) - parseInt(a.data.year))
