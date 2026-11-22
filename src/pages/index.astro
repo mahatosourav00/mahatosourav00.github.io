@@ -146,7 +146,7 @@ const stats = [
       </div>
       <div class="hgrid">
         {albums.map((a, i) => (
-          <a href={`/hobbies/${a.id}`} class:list={['hcard', `hcard--${i}`]} data-cursor="Open">
+          <a href={allAlbums.some((c) => c.data.parent === a.id) ? `/hobbies#${a.id}` : `/hobbies/${a.id}`} class:list={['hcard', `hcard--${i}`]} data-cursor="Open">
             <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio={i === 0 ? '4 / 5' : '4 / 3'} />
             <div class="hcard__meta">
               <span class="mono muted">{a.data.kicker}</span>

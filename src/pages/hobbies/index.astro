@@ -17,20 +17,44 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   />
 
   <section class="wrap doors">
-    {albums.map((a, i) => (
-      <a href={`/hobbies/${a.id}`} class="door" data-cursor="Enter">
-        <span class="mono muted door__i">0{i + 1}</span>
-        <div class="door__text">
-          <span class="mono accent">{a.data.kicker}</span>
-          <h2 class="display-l door__title">{a.data.title}</h2>
-          <p class="muted door__intro">{a.data.intro}</p>
-          <span class="mono muted">{frameCount(a)} frames →</span>
+    {albums.map((a, i) => {
+      const subs = allAlbums.filter((c) => c.data.parent === a.id).sort((x, y) => x.data.order - y.data.order);
+      return subs.length > 0 ? (
+        <div class="door door--group" id={a.id}>
+          <span class="mono muted door__i">0{i + 1}</span>
+          <div class="door__text">
+            <span class="mono accent">{a.data.kicker}</span>
+            <h2 class="display-l door__title door__title--static">{a.data.title}</h2>
+            <p class="muted door__intro">{a.data.intro}</p>
+            <span class="mono muted">{subs.length} albums · {frameCount(a)} frames</span>
+          </div>
+          <div class="subs">
+            {subs.map((c) => (
+              <a href={`/hobbies/${a.id}/${c.id}`} class="sub" data-cursor="Open">
+                <Media src={c.data.cover ?? c.data.items.find((x) => x.src)?.src} alt={c.data.title} label={c.data.title} ratio="4 / 5" />
+                <div class="sub__meta">
+                  <h3 class="display-s">{c.data.title}</h3>
+                  <span class="mono muted">{c.data.items.length}</span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
-        <div class="door__media">
-          <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio="4 / 3" />
-        </div>
-      </a>
-    ))}
+      ) : (
+        <a href={`/hobbies/${a.id}`} class="door" data-cursor="Enter">
+          <span class="mono muted door__i">0{i + 1}</span>
+          <div class="door__text">
+            <span class="mono accent">{a.data.kicker}</span>
+            <h2 class="display-l door__title">{a.data.title}</h2>
+            <p class="muted door__intro">{a.data.intro}</p>
+            <span class="mono muted">{frameCount(a)} frames →</span>
+          </div>
+          <div class="door__media">
+            <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio="4 / 3" />
+          </div>
+        </a>
+      );
+    })}
   </section>
 
   <section class="section wrap more">
@@ -45,10 +69,17 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   .doors { display: grid; border-top: 1px solid var(--line); }
   .door { display: grid; grid-template-columns: 60px 1fr 1fr; gap: clamp(20px, 4vw, 60px); align-items: center; padding: clamp(40px, 6vw, 80px) 0; border-bottom: 1px solid var(--line); }
   .door__i { align-self: start; }
+  .door--group { grid-template-columns: 60px 1fr; align-items: start; }
+  .door--group .door__text { max-width: 60ch; }
+  .door__title--static { transition: none; }
+  .subs { grid-column: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2.5vw, 32px); margin-top: clamp(8px, 2vw, 24px); }
+  .sub__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 12px; }
+  .sub:hover h3 { color: var(--accent); }
+  .sub h3 { transition: color 0.3s; }
   .door__title { margin: 12px 0 20px; transition: color 0.4s, transform 0.6s var(--ease); }
   .door:hover .door__title { color: var(--accent); transform: translateX(12px); }
   .door__intro { max-width: 40ch; }
   .also { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 32px; font-family: var(--font-display); font-size: clamp(28px, 3.4vw, 48px); }
   .also li:not(:last-child)::after { content: '·'; margin-left: 32px; color: var(--accent); }
-  @media (max-width: 800px) { .door { grid-template-columns: 1fr; } .door__i { display: none; } }
+  @media (max-width: 800px) { .door, .door--group { grid-template-columns: 1fr; } .door__i { display: none; } .subs { grid-column: 1; grid-template-columns: 1fr; } }
 </style>

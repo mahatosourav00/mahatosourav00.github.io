@@ -9,7 +9,7 @@ export async function getStaticPaths() {
   const all = await getCollection('albums');
   const byOrder = (a: (typeof all)[number], b: (typeof all)[number]) => a.data.order - b.data.order;
   const pathOf = (e: (typeof all)[number]) => (e.data.parent ? `${e.data.parent}/${e.id}` : e.id);
-  return all.map((entry) => {
+  return all.filter((e) => !all.some((c) => c.data.parent === e.id)).map((entry) => {
     const sibs = all.filter((a) => a.data.parent === entry.data.parent).sort(byOrder);
     const next = sibs[(sibs.indexOf(entry) + 1) % sibs.length];
     const children = all.filter((a) => a.data.parent === entry.id).sort(byOrder).map((c) => ({ entry: c, path: pathOf(c) }));
@@ -17,9 +17,7 @@ export async function getStaticPaths() {
     return { params: { slug: pathOf(entry) }, props: { entry, next, nextPath: pathOf(next), children, parent } };
   });
 }
-const { entry, next, nextPath, children, parent } = Astro.props;
-const isGroup = children.length > 0;
-const frames = isGroup ? children.reduce((n, c) => n + c.entry.data.items.length, 0) : 0;
+const { entry, next, nextPath, parent } = Astro.props;
 const d = entry.data;
 const ratioCss = { portrait: '4 / 5', landscape: '3 / 2', square: '1 / 1' } as const;
 
@@ -32,7 +30,7 @@ const items = await Promise.all(
 ---
 <Base title={d.title} description={d.intro}>
   <header class="wrap ahead">
-    <a href={parent ? `/hobbies/${parent.id}` : '/hobbies'} class="mono muted link back" data-reveal data-immediate>← {parent ? parent.data.title : 'Hobbies'}</a>
+    <a href={parent ? `/hobbies#${parent.id}` : '/hobbies'} class="mono muted link back" data-reveal data-immediate>← {parent ? parent.data.title : 'Hobbies'}</a>
     <p class="eyebrow" data-reveal data-immediate>{d.kicker}</p>
     <h1 class="display-xl" data-split data-immediate>{d.title}</h1>
     <div class="ahead__row">
@@ -46,22 +44,6 @@ const items = await Promise.all(
     </div>
   </header>
 
-  {isGroup && (
-    <section class="wrap subs">
-      {children.map((c, i) => (
-        <a href={`/hobbies/${c.path}`} class="sub" data-cursor="Open" data-reveal>
-          <Media src={c.entry.data.cover ?? c.entry.data.items.find((x) => x.src)?.src} alt={c.entry.data.title} label={c.entry.data.title} ratio="4 / 5" />
-          <div class="sub__meta">
-            <span class="mono muted">0{i + 1} · {c.entry.data.items.length} frames</span>
-            <h2 class="display-s">{c.entry.data.title}</h2>
-            <p class="muted sub__intro">{c.entry.data.intro}</p>
-          </div>
-        </a>
-      ))}
-    </section>
-  )}
-
-  {!isGroup && (
   <section class="wrap masonry" data-pswp-gallery>
     {items.map((it, i) => {
       const inner = (
@@ -87,7 +69,6 @@ const items = await Promise.all(
       );
     })}
   </section>
-  )}
 
   {next !== entry && (
     <a href={`/hobbies/${nextPath}`} class="wrap nextalb" data-cursor="Next">
@@ -134,13 +115,6 @@ const items = await Promise.all(
   .ahead__row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; margin-top: 36px; align-items: start; }
   .gear { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; }
   @media (max-width: 800px) { .ahead__row { grid-template-columns: 1fr; } }
-
-  .subs { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 40px); padding-bottom: clamp(60px, 8vw, 110px); }
-  .sub__meta { display: grid; gap: 8px; padding-top: 16px; }
-  .sub__intro { font-size: 14px; margin: 0; max-width: 34ch; }
-  .sub:hover h2 { color: var(--accent); }
-  .sub h2 { transition: color 0.3s; }
-  @media (max-width: 800px) { .subs { grid-template-columns: 1fr; } }
 
   .masonry { columns: 3 320px; column-gap: clamp(16px, 2vw, 28px); }
   .tile { break-inside: avoid; margin: 0 0 clamp(28px, 3vw, 44px); }
