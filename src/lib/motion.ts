@@ -15,8 +15,8 @@ let tick: ((t: number) => void) | null = null;
 const pending = new Map<SplitType, gsap.core.Tween>();
 let lastWidth = 0;
 
-// If the viewport width changes before a split heading is revealed, its measured
-// lines are stale: drop the animation and show the text normally.
+// If the viewport width changes, the measured lines are stale: drop any running animation and
+// restore natural text flow for every split text, so it re-wraps for the new width.
 function onResize() {
   if (Math.abs(window.innerWidth - lastWidth) < 40) return;
   lastWidth = window.innerWidth;
@@ -26,6 +26,8 @@ function onResize() {
     split.revert();
   });
   pending.clear();
+  splits.forEach((s) => s.revert());
+  splits = [];
 }
 
 export function getLenis() {
@@ -82,9 +84,10 @@ function initReveals() {
         stagger: 0.08,
         delay,
         scrollTrigger: immediate ? undefined : { trigger: el, start: 'top 88%' },
-        // Restore natural text flow once revealed so later resizes re-wrap correctly
+        // Keep the split lines after the reveal. Reverting to natural flow here made some lines re-wrap
+        // (a yellow italic phrase jumped up a line) because split and natural layouts can wrap differently.
+        // A width change reverts them instead (see onResize).
         onComplete: () => {
-          split.revert();
           pending.delete(split);
         },
       });
