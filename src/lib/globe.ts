@@ -203,7 +203,15 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
   // Phones: fewer pixels and vertices, no MSAA. Everything adapts further below if frames run slow.
   const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, alpha: true, powerPreference: 'high-performance' });
-  let pixelRatio = Math.min(window.devicePixelRatio, coarse ? 1.25 : 1.75);
+  // Software WebGL (browser hardware acceleration off, or GPU blocklisted) is far too slow for per-pixel shading: start tiny
+  let software = false;
+  try {
+    const gl = renderer.getContext();
+    const info = gl.getExtension('WEBGL_debug_renderer_info');
+    const name = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+    software = /swiftshader|software|llvmpipe|basic render|microsoft basic/i.test(name);
+  } catch { /* ignore */ }
+  let pixelRatio = software ? 0.5 : Math.min(window.devicePixelRatio, coarse ? 1.25 : 1.75);
   renderer.setPixelRatio(pixelRatio);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -256,7 +264,7 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
     loadTex('ceres-dem-2k.jpg', 'uCeresH', 'uHasCeresH');
   });
   const ready = Promise.race([moonLoaded, new Promise<void>((res) => setTimeout(res, 3500))]);
-  const geo = new THREE.SphereGeometry(1, coarse ? 128 : 256, coarse ? 128 : 256);
+  const geo = new THREE.SphereGeometry(1, software ? 64 : coarse ? 128 : 256, software ? 64 : coarse ? 128 : 256);
   const mat = new THREE.ShaderMaterial({ vertexShader: vertex, fragmentShader: fragment, uniforms });
   const body = new THREE.Mesh(geo, mat);
   body.rotation.z = 0.12;
@@ -334,10 +342,14 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
   const clock = new THREE.Clock();
   let raf = 0;
   let frameAcc = 0, frameCount = 0, warm = 0;
+  let skip = software ? 2 : 1; // render every Nth frame; raised when even the lowest resolution cannot keep up
+  let tickN = 0;
+  let told = false;
   const m4 = new THREE.Matrix4();
   const loop = () => {
     raf = requestAnimationFrame(loop);
     if (!visible || document.hidden) return;
+    if (++tickN % skip !== 0) return;
     const raw = clock.getDelta();
     const dt = Math.min(raw, 0.05);
     uniforms.uTime.value += dt;
@@ -345,10 +357,20 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
     // Dynamic resolution: if frames are consistently slow, drop the render resolution a step (never raises it again)
     frameAcc += raw; frameCount++;
     if (frameCount >= 40) {
-      if (warm++ > 0 && frameAcc / frameCount > 0.027 && pixelRatio > 0.8) {
-        pixelRatio = Math.max(0.75, pixelRatio - 0.25);
-        renderer.setPixelRatio(pixelRatio);
-        resize();
+      // Compare against the time we are allowed per rendered frame (a 60 Hz screen at skip N gives N x 16.7 ms)
+      if (warm++ > 0 && frameAcc / frameCount > 0.027 * skip) {
+        if (pixelRatio > 0.55) {
+          pixelRatio = Math.max(0.5, pixelRatio - (pixelRatio > 1 ? 0.25 : 0.15));
+          renderer.setPixelRatio(pixelRatio);
+          resize();
+        } else if (skip < 3) {
+          skip++;
+        }
+        // This device is struggling: tell the page so it can drop its own smooth-scroll layer and stay native
+        if (!told && (pixelRatio <= 0.75 || skip > 1)) {
+          told = true;
+          window.dispatchEvent(new CustomEvent('portfolio:slow'));
+        }
       }
       frameAcc = 0; frameCount = 0;
     }

@@ -8,6 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 export const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let lenis: Lenis | null = null;
+let smoothOff = false; // set once a slow device is detected, for the rest of the session
 let ctx: gsap.Context | null = null;
 let splits: SplitType[] = [];
 let tick: ((t: number) => void) | null = null;
@@ -32,12 +33,23 @@ export function getLenis() {
 }
 
 function initLenis() {
-  if (reducedMotion() || lenis) return;
+  if (reducedMotion() || lenis || smoothOff) return;
   lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
   lenis.on('scroll', ScrollTrigger.update);
   tick = (t: number) => lenis?.raf(t * 1000);
   gsap.ticker.add(tick);
   gsap.ticker.lagSmoothing(0);
+}
+
+// On devices that cannot keep up (software WebGL etc.), drop the JS smooth-scroll layer: native scrolling stays smooth
+export function disableSmoothScroll() {
+  smoothOff = true;
+  if (!lenis) return;
+  if (tick) gsap.ticker.remove(tick);
+  tick = null;
+  lenis.destroy();
+  lenis = null;
+  ScrollTrigger.refresh();
 }
 
 function splitLines(el: HTMLElement) {
@@ -173,6 +185,8 @@ export function initMotion() {
   initLenis();
   lenis?.scrollTo(0, { immediate: true });
   lastWidth = window.innerWidth;
+  window.removeEventListener('portfolio:slow', disableSmoothScroll);
+  window.addEventListener('portfolio:slow', disableSmoothScroll, { once: true });
   window.removeEventListener('resize', onResize);
   window.addEventListener('resize', onResize);
   // Wait for fonts so line splits are measured correctly
