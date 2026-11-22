@@ -40,7 +40,7 @@ const items = await Promise.all(
     {items.map((it, i) => {
       const inner = (
         <>
-          <Media src={it.src} alt={it.title} label={it.title} ratio={ratioCss[it.ratio]} sizes="(max-width: 700px) 100vw, 33vw" />
+          <Media src={it.src} alt={it.title} label={it.title} ratio={it.src ? `${it.src.width} / ${it.src.height}` : ratioCss[it.ratio]} sizes="(max-width: 700px) 100vw, 33vw" />
           <figcaption class="cap">
             <span class="cap__t">{it.title}</span>
             <span class="mono muted">{String(i + 1).padStart(2, '0')}</span>

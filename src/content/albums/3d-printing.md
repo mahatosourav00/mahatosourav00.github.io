@@ -1,7 +1,7 @@
 ---
 title: 3D Printing
 kicker: Workshop
-order: 3
+order: 5
 intro: My printer is my most-used lab tool. Instrument housings, telescope parts, drone accessories and the occasional just-for-fun print.
 gear: [3D printer, PLA / PETG / TPU, CAD]
 # To add a photo: drop it in src/assets/images/3d-printing/ and add  src: ../../assets/images/3d-printing/your-file.jpg  to an item.
