@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Media from '../components/Media.astro';
+import portrait from '../assets/images/portrait.jpg';
 import { getCollection } from 'astro:content';
 import { site } from '../lib/site';
 
@@ -85,7 +86,10 @@ const stats = [
         </div>
       </div>
       <div class="about__side">
-        <Media alt="Portrait of Sourav Mahato" label="Portrait" ratio="4 / 5" />
+        <figure class="portrait">
+          <Media src={portrait} alt="Portrait of Sourav Mahato" ratio="4 / 5" sizes="(max-width: 800px) 100vw, 40vw" />
+          <figcaption class="portrait__cap mono">Sourav Mahato <span>· Planetary researcher</span></figcaption>
+        </figure>
         <dl class="stats">
           {stats.map((s) => (
             <div class="stat" data-reveal>
@@ -392,6 +396,12 @@ const stats = [
   .about__lead { max-width: 44ch; }
   .about__cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 36px; }
   .about__side { position: sticky; top: 120px; }
+  .portrait { position: relative; margin: 0; border-radius: var(--radius); }
+  .portrait::before { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: var(--radius); pointer-events: none; box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .portrait::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: var(--radius); pointer-events: none; background: linear-gradient(to top, #0a0a0bb3 0%, transparent 32%), linear-gradient(135deg, var(--accent-soft), transparent 45%); mix-blend-mode: normal; }
+  .portrait :global(.media__img) { filter: saturate(0.92) contrast(1.03); }
+  .portrait__cap { position: absolute; left: 16px; bottom: 14px; z-index: 2; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: #f4f1ea; }
+  .portrait__cap span { opacity: 0.65; }
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 20px; margin: 32px 0 0; }
   .stat { border-top: 1px solid var(--line); padding-top: 14px; }
   .stat__n { font-family: var(--font-display); font-size: 52px; line-height: 1; }
