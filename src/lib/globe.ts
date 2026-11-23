@@ -354,7 +354,8 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
 
   const clock = new THREE.Clock();
   let raf = 0;
-  let frameAcc = 0, frameCount = 0, warm = 0;
+  let frameAcc = 0, frameCount = 0, warm = 0, slowRun = 0, goodRun = 0, raised = false;
+  let pixelRatioCap = pixelRatio; // highest resolution we are willing to climb back to
   let skip = software ? 2 : 1; // render every Nth frame; raised when even the lowest resolution cannot keep up
   let tickN = 0;
   let told = false;
@@ -367,12 +368,21 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
     const dt = Math.min(raw, 0.05);
     uniforms.uTime.value += dt;
 
-    // Dynamic resolution: if frames are consistently slow, drop the render resolution a step (never raises it again)
+    // Dynamic resolution: if frames stay slow, drop the render resolution a step. A brief hitch (scrolling, a
+    // texture upload) must not count, so it takes two slow windows in a row; and once frames are healthy again
+    // the resolution climbs back up (never past a level that already proved too slow), so the globe stays sharp.
     frameAcc += raw; frameCount++;
     if (frameCount >= 40) {
+      const avg = frameAcc / frameCount;
       // Compare against the time we are allowed per rendered frame (a 60 Hz screen at skip N gives N x 16.7 ms)
-      if (warm++ > 0 && frameAcc / frameCount > 0.027 * skip) {
+      const slow = warm++ > 0 && avg > 0.027 * skip;
+      slowRun = slow ? slowRun + 1 : 0;
+      goodRun = avg < 0.019 * skip ? goodRun + 1 : 0;
+      if (slowRun >= 2) {
+        slowRun = 0; goodRun = 0;
         if (pixelRatio > 0.55) {
+          if (raised) pixelRatioCap = pixelRatio; // we had climbed to this level and it was too slow: stay below it
+          raised = false;
           pixelRatio = Math.max(0.5, pixelRatio - (pixelRatio > 1 ? 0.25 : 0.15));
           renderer.setPixelRatio(pixelRatio);
           resize();
@@ -384,6 +394,12 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
           told = true;
           window.dispatchEvent(new CustomEvent('portfolio:slow'));
         }
+      } else if (goodRun >= 4 && !software && skip === 1 && pixelRatio < pixelRatioCap) {
+        goodRun = 0;
+        pixelRatio = Math.min(pixelRatioCap, pixelRatio + 0.25);
+        raised = true;
+        renderer.setPixelRatio(pixelRatio);
+        resize();
       }
       frameAcc = 0; frameCount = 0;
     }
