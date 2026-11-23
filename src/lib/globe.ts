@@ -21,8 +21,8 @@ const vertex = /* glsl */ `
     vec3 p = normalize(position);
     vObj = p;
     vec2 uv = eqUV(p);
-    float hm = uHasMoonH > 0.5 ? texture2D(uMoonH, uv).r : 0.5;
-    float hc = uHasCeresH > 0.5 ? texture2D(uCeresH, uv).r : 0.5;
+    float hm = uHasMoonH > 0.5 ? textureLod(uMoonH, uv, 2.5).r : 0.5;
+    float hc = uHasCeresH > 0.5 ? textureLod(uCeresH, uv, 2.5).r : 0.5;
     // Real elevation (LOLA / Dawn), vertically exaggerated so the relief reads at this scale
     float disp = (hm - 0.5) * 0.03 * (1.0 - uMix) + (hc - 0.5) * 0.05 * uMix;
     vec4 w = modelMatrix * vec4(p * (1.0 + disp), 1.0);
@@ -91,37 +91,49 @@ const fragment = /* glsl */ `
   vec2 eqUV(vec3 p) { return vec2(atan(p.x, p.z) / (2.0 * PI) + 0.5, asin(clamp(p.y, -1.0, 1.0)) / PI + 0.5); }
   float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
+  // Screen-space UV footprint (set once in main). The u derivative is wrapped so the atan() seam does not
+  // produce a huge footprint (which would pick the blurriest mip along a line).
+  vec2 gUV; vec2 gDx; vec2 gDy; float gStep;
+  // 0.7 = slightly sharper than the pixel footprint; anisotropic filtering keeps it from crawling
+  vec4 tx(sampler2D t, vec2 uv) { return textureGrad(t, uv, gDx * 0.7, gDy * 0.7); }
+
   // Sample an equirectangular map: returns linear albedo, writes a perturbed object-space normal.
   vec3 sampleMap(sampler2D tex, vec3 p, float texel, float bump, float aScale, float gam, out vec3 nOut) {
-    vec2 uv = eqUV(p);
-    vec3 c = pow(texture2D(tex, uv).rgb, vec3(gam)) * aScale;
-    float hl = lum(texture2D(tex, uv - vec2(texel, 0.0)).rgb);
-    float hr = lum(texture2D(tex, uv + vec2(texel, 0.0)).rgb);
-    float hd = lum(texture2D(tex, uv - vec2(0.0, texel * 2.0)).rgb);
-    float hu = lum(texture2D(tex, uv + vec2(0.0, texel * 2.0)).rgb);
+    vec2 uv = gUV;
+    texel = gStep;
+    vec3 c = pow(tx(tex, uv).rgb, vec3(gam)) * aScale;
+    float hl = lum(tx(tex, uv - vec2(texel, 0.0)).rgb);
+    float hr = lum(tx(tex, uv + vec2(texel, 0.0)).rgb);
+    float hd = lum(tx(tex, uv - vec2(0.0, texel * 2.0)).rgb);
+    float hu = lum(tx(tex, uv + vec2(0.0, texel * 2.0)).rgb);
     vec3 east = normalize(vec3(p.z, 0.0, -p.x) + vec3(1e-5, 0.0, 0.0));
     vec3 north = normalize(vec3(0.0, 1.0, 0.0) - p * p.y);
     float cosLat = max(sqrt(1.0 - p.y * p.y), 0.15);
-    nOut = normalize(p - bump * ((hr - hl) / cosLat * east + (hu - hd) * north));
+    nOut = normalize(p - bump / (gStep * 2048.0) * ((hr - hl) / cosLat * east + (hu - hd) * north));
     return c;
   }
 
   // Tilt a base normal by the gradient of a real elevation map (central differences, equal metric step in u and v).
   vec3 demNormal(sampler2D t, vec3 p, vec3 nBase, float relief) {
-    float texel = 1.0 / 2048.0;
-    vec2 uv = eqUV(p);
-    float hl = texture2D(t, uv - vec2(texel, 0.0)).r;
-    float hr = texture2D(t, uv + vec2(texel, 0.0)).r;
-    float hd = texture2D(t, uv - vec2(0.0, texel * 2.0)).r;
-    float hu = texture2D(t, uv + vec2(0.0, texel * 2.0)).r;
+    float texel = gStep;
+    vec2 uv = gUV;
+    float hl = tx(t, uv - vec2(texel, 0.0)).r;
+    float hr = tx(t, uv + vec2(texel, 0.0)).r;
+    float hd = tx(t, uv - vec2(0.0, texel * 2.0)).r;
+    float hu = tx(t, uv + vec2(0.0, texel * 2.0)).r;
     vec3 east = normalize(vec3(p.z, 0.0, -p.x) + vec3(1e-5, 0.0, 0.0));
     vec3 north = normalize(vec3(0.0, 1.0, 0.0) - p * p.y);
     float cosLat = max(sqrt(1.0 - p.y * p.y), 0.15);
-    return normalize(nBase - relief * ((hr - hl) / cosLat * east + (hu - hd) * north));
+    return normalize(nBase - relief / (gStep * 2048.0) * ((hr - hl) / cosLat * east + (hu - hd) * north));
   }
 
   void main() {
     vec3 p = normalize(vObj);
+    gUV = eqUV(p);
+    gDx = dFdx(gUV); gDy = dFdy(gUV);
+    gDx.x -= floor(gDx.x + 0.5); gDy.x -= floor(gDy.x + 0.5);
+    // Sample the gradient over at least the pixel footprint, so per-texel noise is not amplified when minified
+    gStep = clamp(max(length(gDx), length(gDy)) * 0.55, 1.0 / 2048.0, 1.0 / 128.0);
 
     // ---- Procedural fallback surface (only when a texture is missing) ----
     vec3 nProc = p;
@@ -241,8 +253,9 @@ export function createGlobe(canvas: HTMLCanvasElement, opts: { stars?: boolean; 
     loader.load(
       `${base}/textures/${file}`,
       (t) => {
-        t.generateMipmaps = false;
-        t.minFilter = THREE.LinearFilter;
+        t.generateMipmaps = true;
+        t.minFilter = THREE.LinearMipmapLinearFilter;
+        t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
         t.magFilter = THREE.LinearFilter;
         t.wrapS = THREE.RepeatWrapping;
         t.needsUpdate = true;
