@@ -25,7 +25,7 @@ const projects = defineCollection({
   schema: ({ image }) =>
     z.object({
       title: z.string(),
-      kind: z.enum(['Research instrument', 'Independent', 'Club / Team', 'Outreach']),
+      kind: z.enum(['Research instrument', 'Independent', 'Club / Team', 'Outreach', 'Academic']),
       year: z.string(),
       order: z.number(),
       summary: z.string(),
@@ -33,7 +33,11 @@ const projects = defineCollection({
       featured: z.boolean().default(false),
       specs: z.array(z.object({ k: z.string(), v: z.string() })).default([]),
       cover: image().optional(),
-      gallery: z.array(z.object({ src: image().optional(), caption: z.string() })).default([]),
+      // `video` is a path under /public (e.g. /videos/iot/ambilight.mp4); `src` then acts as its poster frame.
+      // `group` becomes a small heading above the tiles that share it (keep groups to 2-4 tiles).
+      gallery: z.array(z.object({ src: image().optional(), video: z.string().optional(), caption: z.string(), group: z.string().optional() })).default([]),
+      // Optional downloadable write-up (path under /public)
+      report: z.object({ href: z.string(), label: z.string() }).optional(),
     }),
 });
 
@@ -63,6 +67,7 @@ const albums = defineCollection({
         .array(
           z.object({
             src: image().optional(),
+            video: z.string().optional(), // path under /public; `src` is then the poster frame
             title: z.string(),
             caption: z.string().optional(),
             ratio: z.enum(['portrait', 'landscape', 'square']).default('landscape'),

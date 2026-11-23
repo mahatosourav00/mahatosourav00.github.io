@@ -11,12 +11,19 @@ specs:
   - { k: "Video", v: "Digital, low latency" }
   - { k: "Radio range", v: "30 km+" }
   - { k: "Camera", v: "De-cased \"naked\" GoPro, board-powered" }
-# Add photos: put files in src/assets/images/projects/fpv-drone/ and reference them, e.g.
-# cover: ../../assets/images/projects/fpv-drone/cover.jpg
+  - { k: "Printed parts", v: "Camera mount, arm guards, Li-ion module" }
+cover: ../../assets/images/projects/fpv-drone/lineup.jpg
 gallery:
-  - { caption: "Frame & stack" }   # add  src: ../../assets/images/projects/fpv-drone/xxx.jpg
-  - { caption: "Naked GoPro" }   # add  src: ../../assets/images/projects/fpv-drone/xxx.jpg
-  - { caption: "Custom Li-ion module" }   # add  src: ../../assets/images/projects/fpv-drone/xxx.jpg
+  - { src: ../../assets/images/projects/fpv-drone/lineup.jpg, caption: "The current quad with its radio and digital goggles", group: "The setup" }
+  - { src: ../../assets/images/projects/fpv-drone/current-gopro.jpg, caption: "The naked GoPro on its printed mount", group: "The quad today" }
+  - { src: ../../assets/images/projects/fpv-drone/current-front.jpg, caption: "Printed yellow camera cage and arm guards", group: "The quad today" }
+  - { src: ../../assets/images/projects/fpv-drone/current-top.jpg, caption: "Top view: battery strap, ESC and XT60 lead", group: "The quad today" }
+  - { src: ../../assets/images/projects/fpv-drone/build-2020-top.jpg, caption: "The first carbon-fibre build, mid-assembly", group: "Where it started (2020)" }
+  - { src: ../../assets/images/projects/fpv-drone/build-2020-flightready.jpg, caption: "Flight-ready, with camera and green props", group: "Where it started (2020)" }
+  - { src: ../../assets/images/projects/fpv-drone/radio-liion-module.jpg, caption: "Custom Li-ion module on the back of the radio", group: "Radio & goggles" }
+  - { src: ../../assets/images/projects/fpv-drone/goggles-strap.jpg, caption: "Goggles with a printed head-strap mount", group: "Radio & goggles" }
+  - { src: ../../assets/images/fpv-cinematics/ajodhya.jpg, video: /videos/fpv/ajodhya.mp4, caption: "Forest and hills at Ajodhya", group: "In the air" }
+  - { src: ../../assets/images/fpv-cinematics/campus-flyover.jpg, video: /videos/fpv/campus-flyover.mp4, caption: "Campus flyover", group: "In the air" }
 ---
 
 ## Build
@@ -30,3 +37,9 @@ gallery:
 
 - Radio controllers flashed with open-source **OpenTX** firmware.
 - 3D-printed **Li-ion power modules** with onboard charging.
+
+## Then and now
+
+The first quad (2020) was a black carbon-fibre frame with red motors and standoffs. The current one is lighter and tougher: 3D-printed yellow camera cage and arm guards take the crashes, and the GoPro is stripped to its bare board. Even the goggles and radio have been modified, with a printed strap mount and a battery module.
+
+I also fly it for fun. The best clips are in my [FPV cinematics album](/hobbies/fpv-cinematics).

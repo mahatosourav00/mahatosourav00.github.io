@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Media from '../../components/Media.astro';
+import Video from '../../components/Video.astro';
 import { getCollection } from 'astro:content';
 import { getImage } from 'astro:assets';
 import 'photoswipe/style.css';
@@ -21,6 +22,8 @@ const { entry, next, nextPath, parent } = Astro.props;
 const d = entry.data;
 const ratioCss = { portrait: '4 / 5', landscape: '3 / 2', square: '1 / 1' } as const;
 
+const n = d.items.length;
+const cols = n <= 1 ? 1 : n <= 3 ? n : n === 4 ? 2 : 3;
 const items = await Promise.all(
   d.items.map(async (it) => {
     const full = it.src ? await getImage({ src: it.src, width: Math.min(it.src.width, 2400) }) : null;
@@ -44,11 +47,13 @@ const items = await Promise.all(
     </div>
   </header>
 
-  <section class="wrap masonry" data-pswp-gallery>
+  <section class="wrap masonry" data-pswp-gallery style={`--cols:${cols}`}>
     {items.map((it, i) => {
       const inner = (
         <>
-          <Media src={it.src} alt={it.title} label={it.title} ratio={it.src ? `${it.src.width} / ${it.src.height}` : ratioCss[it.ratio]} sizes="(max-width: 700px) 100vw, 33vw" />
+          {it.video
+            ? <Video src={it.video} poster={it.src} alt={it.title} ratio={it.src ? `${it.src.width} / ${it.src.height}` : ratioCss[it.ratio]} />
+            : <Media src={it.src} alt={it.title} label={it.title} ratio={it.src ? `${it.src.width} / ${it.src.height}` : ratioCss[it.ratio]} sizes="(max-width: 700px) 100vw, 33vw" />}
           <figcaption class="cap">
             <span class="cap__t">{it.title}</span>
             <span class="mono muted">{String(i + 1).padStart(2, '0')}</span>
@@ -60,7 +65,7 @@ const items = await Promise.all(
           )}
         </>
       );
-      return it.full ? (
+      return it.full && !it.video ? (
         <figure class="tile" data-reveal>
           <a href={it.full.src} data-pswp-width={it.full.attributes.width} data-pswp-height={it.full.attributes.height} data-caption={it.caption ?? it.title} data-cursor="Zoom" target="_blank">{inner}</a>
         </figure>
@@ -116,7 +121,9 @@ const items = await Promise.all(
   .gear { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; }
   @media (max-width: 800px) { .ahead__row { grid-template-columns: 1fr; } }
 
-  .masonry { columns: 3 320px; column-gap: clamp(16px, 2vw, 28px); }
+  .masonry { column-count: var(--cols, 3); column-gap: clamp(16px, 2vw, 28px); }
+  @media (max-width: 800px) { .masonry { column-count: min(var(--cols, 3), 2); } }
+  @media (max-width: 520px) { .masonry { column-count: 1; } }
   .tile { break-inside: avoid; margin: 0 0 clamp(28px, 3vw, 44px); }
   .tile a { display: block; }
   .cap { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }

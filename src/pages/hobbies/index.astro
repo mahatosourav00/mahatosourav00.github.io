@@ -8,7 +8,7 @@ const allAlbums = await getCollection('albums');
 const albums = allAlbums.filter((a) => !a.data.parent).sort((a, b) => a.data.order - b.data.order);
 const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allAlbums.filter((c) => c.data.parent === a.id).reduce((n, c) => n + c.data.items.length, 0);
 ---
-<Base title="Hobbies" description="Astrophotography, photography and 3D printing by Sourav Mahato.">
+<Base title="Hobbies" description="Astrophotography, photography, FPV cinematics and 3D printing by Sourav Mahato.">
   <PageHeader
     eyebrow="Hobbies"
     title="What I do"
@@ -28,7 +28,7 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
             <p class="muted door__intro">{a.data.intro}</p>
             <span class="mono muted">{subs.length} albums · {frameCount(a)} frames</span>
           </div>
-          <div class="subs">
+          <div class="subs" style={`--n:${Math.min(subs.length, 4)}`}>
             {subs.map((c) => (
               <a href={`/hobbies/${a.id}/${c.id}`} class="sub" data-cursor="Open">
                 <Media src={c.data.cover ?? c.data.items.find((x) => x.src)?.src} alt={c.data.title} label={c.data.title} ratio="4 / 5" />
@@ -60,7 +60,7 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   <section class="section wrap more">
     <p class="eyebrow" data-reveal>Also into</p>
     <ul class="also" data-reveal>
-      <li>FPV flying</li><li>Home automation</li><li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
+      <li>Home automation</li><li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
     </ul>
   </section>
 </Base>
@@ -72,7 +72,7 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   .door--group { grid-template-columns: 60px 1fr; align-items: start; }
   .door--group .door__text { max-width: 60ch; }
   .door__title--static { transition: none; }
-  .subs { grid-column: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2.5vw, 32px); margin-top: clamp(8px, 2vw, 24px); }
+  .subs { grid-column: 2; display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: clamp(16px, 2.5vw, 32px); margin-top: clamp(8px, 2vw, 24px); }
   .sub__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 12px; }
   .sub:hover h3 { color: var(--accent); }
   .sub h3 { transition: color 0.3s; }

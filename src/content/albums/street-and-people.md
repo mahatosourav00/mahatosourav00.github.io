@@ -117,4 +117,109 @@ items:
   - src: ../../assets/images/street-and-people/through-the-gate.jpg
     title: "Through the gate"
     ratio: square
+  - src: ../../assets/images/street-and-people/paper-lantern-skylight.jpg
+    title: "Paper lantern under the skylight"
+    ratio: square
+  - src: ../../assets/images/street-and-people/hands-around-a-candle.jpg
+    title: "Hands around a candle"
+    ratio: square
+  - src: ../../assets/images/street-and-people/valve-wheel.jpg
+    title: "Valve wheel"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/night-temple-flare.jpg
+    title: "Night temple with a light flare"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/pan-scooter.jpg
+    title: "Motion pan: scooter"
+    ratio: square
+  - src: ../../assets/images/street-and-people/pan-purple-glow.jpg
+    title: "Motion pan: purple glow"
+    ratio: square
+  - src: ../../assets/images/street-and-people/pan-bike-rider.jpg
+    title: "Motion pan: bike and rider"
+    ratio: square
+  - src: ../../assets/images/street-and-people/farmer-with-pole.jpg
+    title: "Farmer carrying a pole"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/elder-in-profile.jpg
+    title: "Elder in profile"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/waiting-in-the-hall.jpg
+    title: "Waiting in the hall"
+    ratio: landscape
+  - src: ../../assets/images/street-and-people/balloon-seller-bw.jpg
+    title: "Balloon seller"
+    ratio: square
+  - src: ../../assets/images/street-and-people/child-wrapped-bw.jpg
+    title: "Child wrapped up for winter"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/smiley-balloon.jpg
+    title: "Girl with a smiley balloon"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/children-water-edge.jpg
+    title: "Children at the water's edge"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/balloons-winter-mist.jpg
+    title: "Balloons in the winter mist"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/boatman-in-white.jpg
+    title: "Boatman in white"
+    ratio: landscape
+  - src: ../../assets/images/street-and-people/dome-finial-pigeon.jpg
+    title: "Dome finial with a pigeon"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/domes-high-key.jpg
+    title: "Domes, high key"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/benches-under-trees.jpg
+    title: "Benches under the trees"
+    ratio: square
+  - src: ../../assets/images/street-and-people/marble-hall-light.jpg
+    title: "Light across a marble hall"
+    ratio: square
+  - src: ../../assets/images/street-and-people/cyclist-through-gantry.jpg
+    title: "Cyclist through the gantry"
+    ratio: square
+  - src: ../../assets/images/street-and-people/containers-and-rails.jpg
+    title: "Containers and rails"
+    ratio: square
+  - src: ../../assets/images/street-and-people/yellow-helmet.jpg
+    title: "Worker in a yellow helmet"
+    ratio: square
+  - src: ../../assets/images/street-and-people/e-rickshaw-driver.jpg
+    title: "E-rickshaw driver"
+    ratio: square
+  - src: ../../assets/images/street-and-people/leaning-on-the-truck.jpg
+    title: "Worker leaning on the truck"
+    ratio: square
+  - src: ../../assets/images/street-and-people/dome-behind-rooftops.jpg
+    title: "Dome behind the rooftops"
+    ratio: square
+  - src: ../../assets/images/street-and-people/bike-at-sunset.jpg
+    title: "Bike at sunset"
+    ratio: square
+  - src: ../../assets/images/street-and-people/parked-cars-evening.jpg
+    title: "Parked cars, evening light"
+    ratio: square
+  - src: ../../assets/images/street-and-people/feet-out-the-window.jpg
+    title: "Feet out the window"
+    ratio: square
+  - src: ../../assets/images/street-and-people/window-light-room.jpg
+    title: "Window light, empty room"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/lobby-reflections.jpg
+    title: "Lobby reflections"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/street-dusk-cow.jpg
+    title: "Street at dusk with a cow"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/boatman-beyond-silhouette.jpg
+    title: "Boatman beyond a silhouette"
+    ratio: square
+  - src: ../../assets/images/street-and-people/junction-motion-blur.jpg
+    title: "Motion blur at the junction"
+    ratio: portrait
+  - src: ../../assets/images/street-and-people/wading-by-the-boat.jpg
+    title: "Wading by the boat"
+    ratio: square
 ---

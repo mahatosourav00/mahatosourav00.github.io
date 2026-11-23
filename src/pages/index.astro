@@ -151,7 +151,7 @@ const stats = [
       <div class="hgrid">
         {albums.map((a, i) => (
           <a href={allAlbums.some((c) => c.data.parent === a.id) ? `/hobbies#${a.id}` : `/hobbies/${a.id}`} class:list={['hcard', `hcard--${i}`]} data-cursor="Open">
-            <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio={i === 0 ? '4 / 5' : '4 / 3'} />
+            <Media src={a.data.cover ?? a.data.items.find((x) => x.src)?.src} alt={a.data.title} label={a.data.title} ratio="4 / 3" />
             <div class="hcard__meta">
               <span class="mono muted">{a.data.kicker}</span>
               <h3 class="display-s">{a.data.title}</h3>
@@ -447,12 +447,11 @@ const stats = [
   }
 
   /* Hobbies */
-  .hgrid { display: grid; grid-template-columns: 1.15fr 1fr; grid-template-rows: auto auto; gap: clamp(20px, 3vw, 40px); }
-  .hcard--0 { grid-row: span 2; }
+  .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 40px); }
   .hcard__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-top: 16px; }
   .hcard:hover h3 { color: var(--accent); }
   .hcard h3 { transition: color 0.3s; }
-  @media (max-width: 800px) { .hgrid { grid-template-columns: 1fr; } .hcard--0 { grid-row: auto; } }
+  @media (max-width: 800px) { .hgrid { grid-template-columns: 1fr; } }
 
   /* Publications */
   .pubs__grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: clamp(40px, 6vw, 100px); }

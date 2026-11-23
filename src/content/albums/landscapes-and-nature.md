@@ -3,7 +3,7 @@ title: "Landscapes & Nature"
 kicker: "Daylight"
 parent: photography
 order: 1
-intro: "Landscapes, light and small details: campus roads at dusk, quiet lakes, trees and the birds that share them."
+intro: "Landscapes, light and small details: campus roads at dusk, quiet lakes, trees and the sky above them."
 gear: ["Camera body", "Lenses"]
 items:
   - src: ../../assets/images/landscapes-and-nature/golden-hour-path.jpg
@@ -110,5 +110,44 @@ items:
     ratio: portrait
   - src: ../../assets/images/landscapes-and-nature/dry-grass-field.jpg
     title: "Dry grass field"
+    ratio: portrait
+  - src: ../../assets/images/landscapes-and-nature/mountain-view-feet-up.jpg
+    title: "Mountain view, feet up"
+    ratio: square
+  - src: ../../assets/images/landscapes-and-nature/blue-hour-highway.jpg
+    title: "Blue hour over the highway"
+    ratio: square
+  - src: ../../assets/images/landscapes-and-nature/feet-on-the-beach.jpg
+    title: "Feet on the beach"
+    ratio: square
+  - src: ../../assets/images/landscapes-and-nature/clouds-over-the-flag.jpg
+    title: "Clouds over the flag"
+    ratio: square
+  - src: ../../assets/images/landscapes-and-nature/sun-through-leaves.jpg
+    title: "Sun through the leaves"
+    ratio: square
+  - src: ../../assets/images/landscapes-and-nature/hazy-red-sun.jpg
+    title: "Hazy red sun, dead tree"
+    ratio: portrait
+  - src: ../../assets/images/landscapes-and-nature/trees-at-dusk.jpg
+    title: "Trees at dusk"
+    ratio: landscape
+  - src: ../../assets/images/landscapes-and-nature/forest-clearing.jpg
+    title: "Forest clearing"
+    ratio: landscape
+  - src: ../../assets/images/landscapes-and-nature/bare-trees-mist.jpg
+    title: "Bare trees in the mist"
+    ratio: portrait
+  - src: ../../assets/images/landscapes-and-nature/hazy-river-dusk.jpg
+    title: "Hazy river at dusk"
+    ratio: landscape
+  - src: ../../assets/images/landscapes-and-nature/looking-up-white-trunks.jpg
+    title: "Looking up through the trees"
+    ratio: portrait
+  - src: ../../assets/images/landscapes-and-nature/red-earth-path-sunset.jpg
+    title: "Red-earth path at sunset"
+    ratio: portrait
+  - src: ../../assets/images/landscapes-and-nature/shadows-on-the-grass.jpg
+    title: "Shadows on the grass"
     ratio: portrait
 ---

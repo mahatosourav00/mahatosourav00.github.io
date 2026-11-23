@@ -36,6 +36,8 @@ const { title, description, eyebrow, back, meta = [], next } = Astro.props;
       <aside class="art__aside"><slot name="aside" /></aside>
     </div>
 
+    <div class="wrap art__after"><slot name="after" /></div>
+
     {next && (
       <a href={next.href} class="wrap art__next" data-cursor="Next">
         <span class="mono muted">Next</span>
@@ -54,6 +56,8 @@ const { title, description, eyebrow, back, meta = [], next } = Astro.props;
   .art__meta dd { margin: 6px 0 0; font-size: 15px; }
   .art__body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(40px, 6vw, 100px); padding-block: clamp(48px, 7vw, 100px); }
   .art__aside:empty { display: none; }
+  .art__after { padding-bottom: clamp(64px, 9vw, 130px); }
+  .art__after:empty { display: none; }
   .art__next { display: flex; flex-direction: column; gap: 12px; padding-block: 80px; border-top: 1px solid var(--line); transition: color 0.3s; }
   .art__next:hover { color: var(--accent); }
   @media (max-width: 960px) { .art__body { grid-template-columns: 1fr; } }

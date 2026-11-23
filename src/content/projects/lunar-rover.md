@@ -10,12 +10,15 @@ specs:
   - { k: "Rover", v: "Wireless, solar, ultrasonic, live camera" }
   - { k: "Maze bot", v: "8-channel IR array" }
   - { k: "Role", v: "Hardware developer" }
-# Add photos: put files in src/assets/images/projects/lunar-rover/ and reference them, e.g.
-# cover: ../../assets/images/projects/lunar-rover/cover.jpg
+cover: ../../assets/images/projects/lunar-rover/line-follower-a.jpg
 gallery:
-  - { caption: "Rover prototype" }   # add  src: ../../assets/images/projects/lunar-rover/xxx.jpg
-  - { caption: "Line follower" }   # add  src: ../../assets/images/projects/lunar-rover/xxx.jpg
+  - { src: ../../assets/images/projects/lunar-rover/line-follower-a.jpg, caption: "8-channel IR sensor bar at the front", group: "Line follower" }
+  - { src: ../../assets/images/projects/lunar-rover/line-follower-b.jpg, caption: "Motor-driver shield and the two driven wheels", group: "Line follower" }
 ---
 
 - Led initial development of a **line-follower robot** with an 8-channel IR sensor array for maze solving.
 - Built a wirelessly controlled **lunar rover prototype**, inspired by ISRO's Pragyan, with ultrasonic sensors, solar panels and real-time camera feeds.
+
+## The line follower
+
+An 8-channel IR array reads the line under the robot. A motor-driver shield on an Arduino-class board turns the readings into wheel speeds. With eight sensors the robot sees where the line is heading, not just whether it is on it, which is what makes junction detection and maze solving possible.

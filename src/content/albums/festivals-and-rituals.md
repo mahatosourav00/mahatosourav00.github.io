@@ -84,4 +84,37 @@ items:
   - src: ../../assets/images/festivals-and-rituals/bowing.jpg
     title: "Bowing"
     ratio: square
+  - src: ../../assets/images/festivals-and-rituals/cotton-candy-seller.jpg
+    title: "Cotton candy seller at the fair"
+    ratio: portrait
+  - src: ../../assets/images/festivals-and-rituals/festival-float-crowd.jpg
+    title: "Festival float in the crowd"
+    ratio: portrait
+  - src: ../../assets/images/festivals-and-rituals/market-stalls.jpg
+    title: "Market stalls"
+    ratio: landscape
+  - src: ../../assets/images/festivals-and-rituals/night-masks-4.jpg
+    title: "Night masks"
+    ratio: landscape
+  - src: ../../assets/images/festivals-and-rituals/bridal-preparations.jpg
+    title: "Bridal preparations"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/wedding-ritual.jpg
+    title: "A wedding ritual"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/groom-and-guests.jpg
+    title: "The groom among guests"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/wedding-guests.jpg
+    title: "Wedding guests"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/bridal-procession.jpg
+    title: "Bridal procession"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/bride-head-bowed.jpg
+    title: "Bride, head bowed"
+    ratio: square
+  - src: ../../assets/images/festivals-and-rituals/through-the-car-window.jpg
+    title: "Through the car window"
+    ratio: square
 ---

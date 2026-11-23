@@ -1,6 +1,7 @@
 ---
 import Article from '../../layouts/Article.astro';
 import Media from '../../components/Media.astro';
+import Gallery from '../../components/Gallery.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -23,16 +24,11 @@ const d = entry.data;
 
   <Content />
 
-  {d.gallery.length > 0 && (
-    <div class="gallery not-prose">
-      {d.gallery.map((g) => (
-        <figure>
-          <Media src={g.src} alt={g.caption} label={g.caption} ratio="4 / 3" />
-          <figcaption class="mono muted">{g.caption}</figcaption>
-        </figure>
-      ))}
-    </div>
+  {d.report && (
+    <p class="report not-prose"><a href={d.report.href} class="mono link" target="_blank" rel="noopener">{d.report.label} ↗</a></p>
   )}
+
+  <Gallery slot="after" items={d.gallery} />
 
   <div slot="aside" class="specs">
     <p class="mono muted">Spec sheet</p>
@@ -45,14 +41,10 @@ const d = entry.data;
 </Article>
 
 <style>
-  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; }
-  .gallery figure { margin: 0; }
-  .gallery figcaption { margin-top: 10px; text-transform: none; letter-spacing: 0; }
-  .gallery figure:first-child { grid-column: span 2; }
+  .report { margin-top: 32px; }
   .specs { position: sticky; top: 120px; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--surface); }
   .specs dl { margin: 16px 0 0; }
   .spec { padding: 12px 0; border-top: 1px solid var(--line); }
   .spec dt { font-size: 10px; }
   .spec dd { margin: 4px 0 0; font-size: 15px; }
-  @media (max-width: 600px) { .gallery { grid-template-columns: 1fr; } .gallery figure:first-child { grid-column: auto; } }
 </style>

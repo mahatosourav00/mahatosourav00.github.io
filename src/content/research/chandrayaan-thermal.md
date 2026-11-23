@@ -18,3 +18,7 @@ Near 3 µm, the sunlit Moon glows with its own heat, and that glow can hide or f
 ## Extension (2023–2024)
 
 As a project intern I extended the method to include photometric modelling for **Chandrayaan-1 and Chandrayaan-2** data. I also generalized it so it can be applied to other airless bodies, which later fed directly into my Ceres work.
+
+## Read the thesis
+
+The full M.Sc. thesis, *Thermal Correction of Lunar Hyperspectral Data from Chandrayaan-1* (supervisors Dr. Tuhin Ghosh and Dr. Guneshwar Thangjam, NISER), is available as a [PDF](/docs/msc-thesis-lunar-thermal-correction.pdf). It covers the three-step Wöhler et al. (2017) method, the von Kármán crater study area and the Hapke phase-curve fitting.
