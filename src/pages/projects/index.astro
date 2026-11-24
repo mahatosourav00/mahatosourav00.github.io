@@ -5,16 +5,14 @@ import ProjectCard from '../../components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const shown = projects.filter((p) => p.data.cover);
-const wip = projects.filter((p) => !p.data.cover);
 const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
 ---
-<Base title="Builds" description="Instruments, robots and flying machines built by Sourav Mahato: a goniometer, a 3D-printed spectrometer, an astro-tracker, FPV drones and more.">
+<Base title="Builds" description="Instruments, robots, flying machines and apps built by Sourav Mahato: a goniometer, a 3D-printed spectrometer, an astro-tracker, FPV drones, Mosaic Studio and more.">
   <PageHeader
     eyebrow="Builds"
     title="Made by"
     italic="hand."
-    lead="Scientific instruments, robots and flying machines. Cheap where possible, 3D printed where sensible, and always open to being taken apart again."
+    lead="Scientific instruments, robots, flying machines, and the apps I needed but couldn't find. Cheap where possible, 3D printed where sensible, and always open to being taken apart again."
   />
 
   <section class="wrap">
@@ -24,27 +22,11 @@ const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
       ))}
     </div>
     <div class="pgrid">
-      {shown.map((p, i) => (
+      {projects.map((p, i) => (
         <div class="pgrid__item" data-kind={p.data.kind}><ProjectCard project={p} index={i} /></div>
       ))}
     </div>
 
-    {wip.length > 0 && (
-      <div class="wip" data-reveal>
-        <p class="eyebrow">In the workshop · photos to come</p>
-        <ul class="wip__list">
-          {wip.map((p) => (
-            <li class="pgrid__item wip__item" data-kind={p.data.kind}>
-              <a href={`/projects/${p.id}`} class="wip__row" data-cursor="View">
-                <span class="mono muted">{p.data.kind} · {p.data.year}</span>
-                <span class="wip__title">{p.data.title}</span>
-                <span class="muted wip__sum">{p.data.summary}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
   </section>
   <div class="section"></div>
 </Base>
@@ -54,13 +36,11 @@ const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
   function init() {
     const btns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
     const items = document.querySelectorAll<HTMLElement>('.pgrid__item');
-    const wipBox = document.querySelector<HTMLElement>('.wip');
     btns.forEach((b) =>
       b.addEventListener('click', () => {
         const k = b.dataset.filter;
         btns.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
         items.forEach((it) => { it.hidden = !(k === 'All' || it.dataset.kind === k); });
-        if (wipBox) wipBox.hidden = ![...wipBox.querySelectorAll<HTMLElement>('.pgrid__item')].some((it) => !it.hidden);
         ScrollTrigger.refresh();
       }),
     );
@@ -75,15 +55,7 @@ const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
   .filter.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
   .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 64px clamp(20px, 3vw, 40px); }
   .pgrid__item:nth-child(3n + 2) { margin-top: 80px; }
-  .pgrid__item[hidden], .wip[hidden] { display: none; }
-  .wip { margin-top: clamp(80px, 10vw, 140px); border-top: 1px solid var(--line); padding-top: 32px; }
-  .wip__list { list-style: none; margin: 24px 0 0; padding: 0; }
-  .wip__row { display: grid; grid-template-columns: 220px 1fr 1.4fr; gap: 8px 32px; align-items: baseline; padding: 22px 0; border-bottom: 1px solid var(--line); transition: color 0.3s; }
-  .wip__row:hover .wip__title { color: var(--accent); }
-  .wip__title { font-family: var(--font-display); font-size: clamp(22px, 2.2vw, 30px); line-height: 1.15; transition: color 0.3s; }
-  .wip__sum { font-size: 15px; max-width: 52ch; }
-  .wip .pgrid__item:nth-child(n) { margin-top: 0; }
-  @media (max-width: 800px) { .wip__row { grid-template-columns: 1fr; } }
+  .pgrid__item[hidden] { display: none; }
   @media (max-width: 1000px) { .pgrid { grid-template-columns: 1fr 1fr; } .pgrid__item:nth-child(3n + 2) { margin-top: 0; } .pgrid__item:nth-child(even) { margin-top: 60px; } }
   @media (max-width: 620px) { .pgrid { grid-template-columns: 1fr; } .pgrid__item:nth-child(even) { margin-top: 0; } }
 </style>

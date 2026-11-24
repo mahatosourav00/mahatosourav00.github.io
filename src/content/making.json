@@ -1,0 +1,284 @@
+[
+  {
+    "id": "lunar-rover",
+    "order": 1,
+    "year": "2019",
+    "kind": "build",
+    "title": "A lunar rover model, as a beginner",
+    "short": "Lunar rover",
+    "map": [0, 1],
+    "project": "lunar-rover",
+    "text": "A team build for an outreach event on the Chandrayaan-2 mission, organised by NISER's School of Earth and Planetary Sciences: a simple, look-alike model of its rover. It taught me the fundamentals, and gave me the confidence to try something on my own.",
+    "learned": ["Arduino", "Motor drivers", "Sensors", "Teamwork"],
+    "from": []
+  },
+  {
+    "id": "fpv-drone",
+    "order": 2,
+    "year": "2019 – 20",
+    "kind": "build",
+    "title": "An FPV drone, a childhood dream",
+    "short": "FPV drone",
+    "map": [1, 1],
+    "project": "fpv-drone",
+    "note": "from-a-scholarship-to-chandrayaan-2",
+    "text": "On a ₹5,000-a-month scholarship, I planned the whole build first, then saved for months at a time to buy one part. It first flew in 2020, and it has been upgraded ever since.",
+    "learned": ["Betaflight", "INAV", "OpenTX", "ExpressLRS", "Motor protocols"],
+    "from": [
+      {
+        "id": "lunar-rover",
+        "via": "the basics, and the confidence to build alone"
+      }
+    ]
+  },
+  {
+    "id": "fpv-cinematics",
+    "order": 3,
+    "year": "2020 –",
+    "kind": "hobby",
+    "title": "Flying it to new places",
+    "short": "FPV cinematics",
+    "map": [2, 2],
+    "album": "fpv-cinematics",
+    "text": "Once it flew well, it started travelling with me. Filming led to editing: how video files work, codecs, colour, and smoothing out shaky footage.",
+    "learned": ["Colour grading", "Codecs", "Gyroflow", "ReelSteady"],
+    "from": [
+      {
+        "id": "fpv-drone",
+        "via": "a drone that could carry a GoPro"
+      }
+    ]
+  },
+  {
+    "id": "quadcopter",
+    "order": 4,
+    "year": "2020 – 23",
+    "kind": "build",
+    "title": "An autonomous drone, leading a team",
+    "short": "Quadcopter",
+    "map": [2, 1],
+    "project": "quadcopter",
+    "text": "The FPV build gave me the confidence to lead a bigger one on club funding: a drone that flies itself, designed as a platform other projects, such as AI vision, can plug into.",
+    "learned": ["ArduPilot", "PX4", "QGroundControl", "PID tuning", "Leading a team"],
+    "from": [
+      {
+        "id": "fpv-drone",
+        "via": "flight controllers, firmware and tuning"
+      }
+    ]
+  },
+  {
+    "id": "3d-printer",
+    "order": 5,
+    "year": "2023",
+    "kind": "tool",
+    "title": "A 3D printer, my magic pencil",
+    "short": "3D printer",
+    "map": [3, 1],
+    "album": "3d-printing",
+    "text": "After several builds, I knew I needed one. It felt like the magic pencil from Shaka Laka Boom Boom: draw something, and it becomes real. I took it fully apart to repair it, then modded it and moved it to Klipper.",
+    "learned": ["CAD", "Slicing", "Printer repair", "Klipper"],
+    "from": [
+      {
+        "id": "quadcopter",
+        "via": "builds that kept needing custom parts"
+      },
+      {
+        "id": "fpv-drone",
+        "via": "mounts, guards and battery modules",
+        "onMap": false
+      }
+    ]
+  },
+  {
+    "id": "home-server",
+    "order": 6,
+    "kind": "tool",
+    "title": "Two Raspberry Pis, then a home server",
+    "short": "Home server",
+    "map": [4, 2],
+    "text": "Klipper runs on a tiny Pi Zero 2 W. That Pi got me curious, so a Pi 4B became a home server: a backup drive shared across the house, my phone photos synced to it, my own films and lossless music streamed from it, and our USB printer made wireless.",
+    "learned": ["Docker", "Docker Compose", "Networking", "Samba", "CUPS", "Syncthing", "Jellyfin", "Navidrome"],
+    "from": [
+      {
+        "id": "3d-printer",
+        "via": "Klipper runs on a Raspberry Pi"
+      }
+    ]
+  },
+  {
+    "id": "iot-lighting",
+    "order": 7,
+    "year": "2022 –",
+    "kind": "build",
+    "title": "Smart lamps & home automation",
+    "short": "Smart lamps",
+    "map": [5, 2],
+    "project": "iot-lighting",
+    "text": "Printing made these possible: printed trays, towers and diffusers around ARGB LEDs and ESP32 boards running WLED. They dance to music with LedFx, follow the TV as an Ambilight with HyperHDR, and tie into Home Assistant.",
+    "learned": ["ARGB LEDs", "ESP32", "WLED", "LedFx", "HyperHDR", "Home Assistant"],
+    "from": [
+      {
+        "id": "3d-printer",
+        "via": "printed housings and diffusers"
+      }
+    ]
+  },
+  {
+    "id": "ledfx-mobile",
+    "order": 7.5,
+    "year": "2026",
+    "kind": "build",
+    "title": "A phone app, because not everyone has a PC",
+    "short": "LedFx Mobile",
+    "map": [6, 3],
+    "project": "ledfx-mobile",
+    "text": "Music-reactive lamps meant LedFx, and LedFx meant a PC running. I couldn't find an open-source phone version, so I wrote one: a native Android app with all of LedFx's effects, streaming to the lamps over Wi-Fi.",
+    "learned": ["Kotlin", "Android", "Audio DSP", "DDP streaming"],
+    "from": [
+      {
+        "id": "iot-lighting",
+        "via": "LedFx only ran on a PC"
+      }
+    ]
+  },
+  {
+    "id": "camera",
+    "order": 8,
+    "year": "2024",
+    "kind": "tool",
+    "title": "A camera, a new way of seeing",
+    "short": "Camera",
+    "map": [4, 0],
+    "album": "photography",
+    "text": "Then a Canon R10. ISO, shutter and aperture were the easy part. Looking for frames changed how I see: the small, precious details in ordinary places, and how beautiful and varied the world around me is.",
+    "learned": ["Exposure", "Composition", "Lightroom"],
+    "from": []
+  },
+  {
+    "id": "astrophotography",
+    "order": 9,
+    "year": "2024 –",
+    "kind": "hobby",
+    "title": "Pointing it at the sky",
+    "short": "Astrophotography",
+    "map": [5, 0],
+    "album": "astrophotography",
+    "text": "With a camera and a space-science background, I pointed it up from a plain tripod. My first Orion Nebula was badly trailed, and still looked like a painting. So I went deep.",
+    "learned": ["Tracking", "Polar alignment", "Plate solving", "Guiding", "Calibration frames", "Siril", "DeepSkyStacker", "N.I.N.A."],
+    "from": [
+      {
+        "id": "camera",
+        "via": "a camera, and a space-science background"
+      }
+    ]
+  },
+  {
+    "id": "mosaic-studio",
+    "order": 9.5,
+    "year": "2026",
+    "kind": "build",
+    "title": "Mosaic Studio, a gift that became an app",
+    "short": "Mosaic Studio",
+    "map": [4, 3],
+    "project": "mosaic-studio",
+    "text": "A mosaic of a friend made from their own photos is a deeply personal gift, but animated ones cost a lot and come in a few fixed styles. So I built my own, first for Windows, then as a free web app that runs anywhere.",
+    "learned": ["Rust", "WebAssembly", "WebGPU", "OpenGL", "PWA"],
+    "from": [
+      {
+        "id": "camera",
+        "via": "thousands of photos, and a gift idea",
+        "onMap": false
+      },
+      {
+        "id": "fpv-cinematics",
+        "via": "codecs and video encoding"
+      }
+    ]
+  },
+  {
+    "id": "astro-tracker",
+    "order": 10,
+    "year": "2025",
+    "kind": "build",
+    "title": "An astro-tracker, built myself",
+    "short": "Astro-tracker",
+    "map": [6, 1],
+    "project": "astro-tracker",
+    "text": "Deep-sky imaging needs a tracking mount, and good ones are expensive. I had some savings, a 3D printer and the skills, so I built my own. This is where the two paths meet.",
+    "learned": ["Stepper control", "GoTo", "Autoguiding"],
+    "from": [
+      {
+        "id": "astrophotography",
+        "via": "long exposures need tracking"
+      },
+      {
+        "id": "3d-printer",
+        "via": "printed gears and housings"
+      }
+    ]
+  },
+  {
+    "id": "spectrometer",
+    "order": 11,
+    "year": "2023 – 24",
+    "kind": "research",
+    "title": "A 3D-printed spectrometer, funded",
+    "short": "Spectrometer",
+    "map": [7, 2],
+    "project": "spectrometer",
+    "text": "Back at NISER, years of finished builds helped me win funding for an instrument of my own: a mostly 3D-printed visible-to-near-infrared spectrometer for lab scattering studies.",
+    "learned": ["Optical design", "Spectral calibration", "Lab measurement"],
+    "from": [
+      {
+        "id": "3d-printer",
+        "via": "printed optics housings and mounts"
+      }
+    ]
+  },
+  {
+    "id": "underwater-rover",
+    "order": 12,
+    "year": "2026",
+    "kind": "research",
+    "title": "A real rover, underwater",
+    "short": "Underwater rover",
+    "map": [9, 0],
+    "research": "underwater-rover",
+    "text": "The same experience got me a position at IIT Bhubaneswar, building hardware for an autonomous rover that inspects oil pipelines up to 100 m deep. It started with a rover model; this one goes to work.",
+    "learned": ["Pressure housings", "Sensor integration", "On-board automation"],
+    "from": [
+      {
+        "id": "quadcopter",
+        "via": "autonomous robot hardware"
+      },
+      {
+        "id": "lunar-rover",
+        "via": "from a rover model to a working rover",
+        "onMap": false
+      }
+    ]
+  },
+  {
+    "id": "goniometer",
+    "order": 13,
+    "year": "2026 –",
+    "kind": "research",
+    "title": "A motorized goniometer, for Chandrayaan-2",
+    "short": "Goniometer",
+    "map": [8, 1],
+    "project": "goniometer",
+    "text": "Now the builds feed my research directly: a computer-controlled rig that measures how light scatters off a surface at any angle, for Chandrayaan-2 IIRS photometric correction.",
+    "learned": ["Photometry", "Python control", "Multi-axis motion"],
+    "from": [
+      {
+        "id": "astro-tracker",
+        "via": "stepper-driven axes under PC control"
+      },
+      {
+        "id": "spectrometer",
+        "via": "scattering studies that needed every angle"
+      }
+    ]
+  }
+]

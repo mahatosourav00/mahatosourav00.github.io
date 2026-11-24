@@ -3,7 +3,7 @@ title: "Autonomous quadcopter"
 kind: "Club / Team"
 year: "2020 – 23"
 order: 5
-featured: false
+featured: true
 summary: "A club quadcopter I led, from an ArduPilot Mega prototype to a Pixhawk 4 build that takes off, lands, flies waypoint missions and holds position with the radio off."
 tags: ["ArduPilot", "Pixhawk 4", "PX4", "Autonomy", "Robotech Club"]
 specs:

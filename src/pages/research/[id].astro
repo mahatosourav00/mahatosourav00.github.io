@@ -2,6 +2,7 @@
 import Article from '../../layouts/Article.astro';
 import Media from '../../components/Media.astro';
 import { getCollection, render } from 'astro:content';
+import { getMaking } from '../../lib/making';
 
 export async function getStaticPaths() {
   const items = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
@@ -10,6 +11,10 @@ export async function getStaticPaths() {
 const { entry, next } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
+// Research that grew out of the hobby builds shows where it came from (src/content/making.json).
+const steps = await getMaking();
+const self = steps.find((st) => st.data.research?.id === entry.id);
+const grewFrom = self ? self.data.from.map((f) => ({ step: steps.find((st) => st.id === f.id)!, via: f.via })) : [];
 ---
 <Article
   title={d.title}
@@ -28,10 +33,26 @@ const d = entry.data;
   <div slot="aside" class="aside">
     <p class="mono muted">Keywords</p>
     <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>
+    {grewFrom.length > 0 && (
+      <div class="lin">
+        <p class="mono muted">Grew out of · <a href={`/hobbies#step-${self!.id}`} class="link">see the whole chain</a></p>
+        <ul>
+          {grewFrom.map((l) => (
+            <li><a href={l.step.href ?? `/hobbies#step-${l.step.id}`}><span class="lin__t">{l.step.data.short} →</span><span class="muted lin__via">{l.via}</span></a></li>
+          ))}
+        </ul>
+      </div>
+    )}
   </div>
 </Article>
 
 <style>
   .aside { position: sticky; top: 120px; }
+  .lin { margin-top: 32px; }
+  .lin ul { list-style: none; margin: 12px 0 0; padding: 0; }
+  .lin a { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .lin__t { font-size: 15px; transition: color 0.3s; }
+  .lin a:hover .lin__t { color: var(--accent); }
+  .lin__via { font-size: 13px; }
   .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 </style>

@@ -16,6 +16,8 @@ gallery:
   - { src: ../../assets/images/projects/lunar-rover/line-follower-b.jpg, caption: "Motor-driver shield and the two driven wheels", group: "Line follower" }
 ---
 
+These were my first builds, done as a beginner in a team at the NISER Robotech Club. The rover was a simple, look-alike model of Chandrayaan-2's rover, built for an outreach event on the Chandrayaan-2 mission organised by NISER's School of Earth and Planetary Sciences. It was not a working replica. What I took away was the fundamentals, and the confidence to start a build of my own: [an FPV drone](/projects/fpv-drone).
+
 - Led initial development of a **line-follower robot** with an 8-channel IR sensor array for maze solving.
 - Built a wirelessly controlled **lunar rover prototype**, inspired by ISRO's Pragyan, with ultrasonic sensors, solar panels and real-time camera feeds.
 

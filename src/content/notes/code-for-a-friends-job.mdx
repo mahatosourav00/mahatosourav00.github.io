@@ -1,0 +1,44 @@
+---
+title: Code for a friend's job
+description: Community health officers in West Bengal must complete a set number of telemedicine calls every month, on lines that are almost always busy. A small browser extension that waits for them.
+date: 2026-11-16
+series: Story
+tags: [Software, Public health, Browser extension]
+builds: [swasthya-ingit]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site).
+QUESTION: Which part did you contribute (a feature, testing with your friends, the install guide)?
+QUESTION: Did it help? Roughly how many health officers used it, or what did your friends say? Even one real sentence from them would make this note.
+QUESTION: Was there any concern about the portal's rules on automation? If there's a sentence to add about using it responsibly, it belongs here. */}
+
+Not every useful program is clever. Some of the most useful ones just wait, so a person doesn't have to.
+
+## The problem
+
+Some of my friends work as **community health officers** in West Bengal. Part of their job is **telemedicine**: connecting with a doctor through a call on the state's **Swasthya Ingit** portal.
+
+Every month, each health officer has to complete a set number of successful telemedicine calls. It's a mandatory part of the job.
+
+The trouble is getting through. The calling traffic is almost always heavy, and the available doctors are almost always busy. Getting a call through meant sitting on the portal, watching the list of doctors, and trying again and again until someone happened to be free at exactly the right moment. Some months, reaching the target came down to luck and patience, for reasons completely outside my friends' control.
+
+## The idea
+
+The portal already showed which doctors were available. What it couldn't do was **wait** for you. So the idea was simple: a browser extension that sits on the portal page and does the waiting.
+
+## What it does
+
+- **Shows availability at a glance**: which doctors are available right now.
+- **Filters doctors by status**, so the list shows only the ones worth trying.
+- **Calls automatically**: as soon as a doctor becomes free, the extension places the call, so the health officer doesn't miss the moment.
+
+It works in Chrome, Edge, Brave and other Chromium-based browsers, and it was written for people with no technical background. The install guide walks through every click, from unzipping the download to loading the extension.
+
+## Credit
+
+The main developer is [PeithonKing](https://github.com/PeithonKing): my junior at NISER, and like a brother to me. He's a coding genius and a great human being, and sometimes my mentor too. I contributed to the project. It's free and open source, under the MIT licence, on [GitHub](https://github.com/mahatosourav00/swasthya_ingit).
+
+## Why I like this one
+
+It's the smallest thing on my [builds page](/projects/swasthya-ingit), and maybe the one closest to real people's lives. No drone, no GPU, no physics. Just a problem my friends had at work, and a small piece of code that does the boring part so a person doesn't have to.

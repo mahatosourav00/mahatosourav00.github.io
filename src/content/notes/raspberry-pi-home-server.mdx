@@ -1,0 +1,213 @@
+---
+title: A home server on a Raspberry Pi 4, with Docker Compose
+description: How a Pi Zero for my 3D printer led to a Pi 4B home server that shares a backup drive, syncs my phone's photos, streams my films and lossless music, and makes a USB printer wireless, and how to build the same thing.
+date: 2026-11-20
+series: How-to
+tags: [Raspberry Pi, Docker, Self-hosting, Networking]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site).
+QUESTION: Which driver did you use for the Epson L380 in CUPS (printer-driver-escpr, Gutenprint, or Epson's own package)?
+QUESTION: What filesystem is the backup drive (ext4 or NTFS/exFAT)? The mount step differs slightly.
+QUESTION: Any gotcha that cost you an evening (permissions, a drive that didn't mount after reboot, DNS)? Real stories make how-tos better. */}
+
+I have two Raspberry Pis, and the first one came from my 3D printer. My printer runs **Klipper**, a firmware that needs a small computer next to it, so I bought a tiny **Pi Zero 2 W** for that one job. Getting it running taught me just enough Linux to get curious.
+
+So I bought a second one, a **Raspberry Pi 4B with 4 GB of RAM**, and turned it into a home server. Today it does five things:
+
+- **Shares a backup hard drive** with every computer in the house, like a network drive.
+- **Syncs the photos from my phone** to that drive, automatically.
+- **Streams my films and shows** to any screen, with **Jellyfin**.
+- **Streams my lossless music** collection, with **Navidrome**.
+- **Makes my USB printer wireless.** My Epson L380 only has a USB cable; plugged into the Pi, every phone and laptop at home can print to it.
+
+This note is the setup I'd give a friend: one folder per service, one small Compose file each, and nothing you can't undo.
+
+## What you need
+
+- **A Raspberry Pi 4 or 5.** 4 GB of RAM is plenty for everything here.
+- **A hard drive or SSD for your data**, on USB. Keep the system on the SD card, but your data on the drive: SD cards wear out under constant writes. A large drive needs a powered USB hub or its own power supply.
+- **Raspberry Pi OS Lite (64-bit)**, written with Raspberry Pi Imager. In the Imager's settings, turn on SSH and set your username before the first boot, so you never need a screen.
+- **A fixed address for the Pi.** In your router, reserve an IP address for it (often called *DHCP reservation*). Every service will live at that address.
+
+## 1. Mount the drive, every boot
+
+Plug in the drive and find its ID:
+
+```bash
+lsblk -f
+```
+
+Note the `UUID` of its partition, make a folder for it, and add one line to `/etc/fstab` so it's mounted at every boot:
+
+```bash
+sudo mkdir -p /mnt/backup
+sudo nano /etc/fstab
+```
+
+```text
+UUID=your-drive-uuid  /mnt/backup  ext4  defaults,nofail  0  2
+```
+
+Use the UUID, not a name like `/dev/sda1`: device names can change between boots, UUIDs don't. The `nofail` option matters too. Without it, a Pi that boots with the drive unplugged gets stuck waiting for it. Run `sudo mount -a` to test, then reboot once to be sure.
+
+## 2. Share it with Samba
+
+Samba makes a folder on the Pi show up as a network drive in Windows, macOS and Linux file managers. It's a system service, so it's simplest to install it directly rather than in Docker:
+
+```bash
+sudo apt install samba
+sudo nano /etc/samba/smb.conf
+```
+
+Add a share at the end of the file:
+
+```ini
+[backup]
+   path = /mnt/backup
+   browseable = yes
+   read only = no
+   valid users = your-username
+```
+
+Give your user a Samba password (separate from the login password) and restart:
+
+```bash
+sudo smbpasswd -a your-username
+sudo systemctl restart smbd
+```
+
+On Windows, open `\\<pi-address>\backup` in File Explorer, and map it as a drive if you like.
+
+## 3. Make a USB printer wireless
+
+My Epson L380 is a good ink-tank printer with one limitation: it only connects by USB. Plugged into the Pi, with **CUPS** (the standard Linux print system) sharing it, it becomes a network printer that phones and laptops find on their own.
+
+```bash
+sudo apt install cups
+sudo usermod -aG lpadmin $USER
+sudo cupsctl --remote-admin --share-printers
+```
+
+Then open `https://<pi-address>:631` (accept the certificate warning), go to **Administration → Add Printer**, pick the printer from the USB list, choose its driver, and tick **Share This Printer**. For many Epson inkjets, the driver comes from the `printer-driver-escpr` package (`sudo apt install printer-driver-escpr`).
+
+Because the Pi announces the printer on the network, phones and computers usually find it without any setup: it just appears in the print dialog, on Android, iPhone, Windows and macOS.
+
+## 4. Install Docker
+
+Everything from here on runs in Docker. Install it with its official convenience script, and let your user run it without `sudo`:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+```
+
+Log out and back in, then check: `docker run --rm hello-world`.
+
+**Why Docker?** Each app lives in its own container with its own dependencies. Updating one can't break another, and removing one leaves no mess behind. And with Compose, each service is one small text file, so the whole server is a folder you can back up.
+
+```text
+~/server/
+├── syncthing/    docker-compose.yml + data
+├── jellyfin/     docker-compose.yml + config/ + cache/
+├── navidrome/    docker-compose.yml + data/
+└── filebrowser/  docker-compose.yml + its config
+```
+
+In any service's folder:
+
+```bash
+docker compose up -d                          # start, in the background
+docker compose logs -f                        # watch what it's doing
+docker compose pull && docker compose up -d   # update
+docker compose down                           # stop
+```
+
+## 5. Syncthing: phone photos, straight to the drive
+
+Syncthing keeps a folder in sync between devices, directly over your network, with no cloud in between. I point it at my phone's camera folder, and every photo lands on the backup drive.
+
+`~/server/syncthing/docker-compose.yml`:
+
+```yaml
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    ports:
+      - "8384:8384"        # web interface
+      - "22000:22000/tcp"  # sync
+      - "22000:22000/udp"
+      - "21027:21027/udp"  # finds devices on your network
+    volumes:
+      - ./data:/var/syncthing
+      - /mnt/backup/phone:/var/syncthing/phone
+    restart: unless-stopped
+```
+
+Open `http://<pi-address>:8384`, install a Syncthing app on the phone, add each device to the other, and share the camera folder to `/var/syncthing/phone`.
+
+## 6. Jellyfin: films and shows
+
+Jellyfin is a media server: it organises your films and shows, with posters and descriptions, and streams them to apps on phones, TVs and browsers.
+
+```yaml
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    ports:
+      - "8096:8096"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /mnt/backup/media:/media:ro
+    restart: unless-stopped
+```
+
+Open `http://<pi-address>:8096` and follow the setup. The `:ro` makes the media folder **read-only** inside the container: Jellyfin can play your files but never change them.[^1]
+
+One honest caveat: a Pi is great at *streaming* files as they are, but slow at *converting* them on the fly. Keep your files in formats your devices can play directly (H.264 video plays almost everywhere), and set the apps to direct play.
+
+## 7. Navidrome: lossless music
+
+Navidrome does for music what Jellyfin does for video, and it's light enough that a Pi barely notices it. It streams your own collection, including lossless FLAC, to the browser or to any app that speaks the Subsonic protocol.
+
+```yaml
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    user: 1000:1000
+    ports:
+      - "4533:4533"
+    volumes:
+      - ./data:/data
+      - /mnt/backup/music:/music:ro
+    restart: unless-stopped
+```
+
+Open `http://<pi-address>:4533` and create the admin account. The `user: 1000:1000` runs it as the Pi's first user, so it can read your files.[^2]
+
+## 8. A file manager in the browser
+
+Samba is perfect on a computer, but awkward on a phone. For that I run **FileBrowser Quantum**, a web file manager: browse, upload, download and share files on the drive from any browser. Its settings have changed between versions, so follow the setup in its [official documentation](https://github.com/gtsteffaniak/filebrowser) rather than a copied file, and point it at `/mnt/backup`.
+
+## 9. Keep it safe
+
+- **Don't open these ports to the internet.** Everything here is meant for your home network. To reach it from outside, use a VPN such as WireGuard or Tailscale, not port forwarding.
+- **A backup drive isn't a backup on its own.** If it's the only copy of your photos, it's just storage. Keep a second copy somewhere else.
+- **Back up `~/server` too.** Those few text files and settings folders are your whole server.
+- **Update one service at a time**, so if something breaks, you know which one.
+
+## Also worth trying
+
+I've also run **Pi-hole**, which blocks ads for every device in the house by acting as its DNS server, and **Immich**, a self-hosted Google Photos with face search. Immich is heavy for a 4 GB Pi; Pi-hole is so light you'll forget it's there.
+
+## What I learned
+
+The Pi taught me more than any course about how a network actually works: what DNS really does, why ports clash, what a container can and can't see, why a drive needs a UUID, and how a printer announces itself to a phone. And it all started because a 3D printer needed a small computer. That's how most of my projects start.
+
+[^1]: Jellyfin documentation, *Container installation*. [jellyfin.org/docs/general/installation/container](https://jellyfin.org/docs/general/installation/container)
+[^2]: Navidrome documentation, *Installing with Docker*. [navidrome.org/docs/installation/docker](https://www.navidrome.org/docs/installation/docker)

@@ -1,0 +1,62 @@
+---
+title: Rendering the Moon and Ceres in a browser
+description: How the globe on my home page is built from real spacecraft maps, why it shimmered, and how it stays smooth on a slow phone.
+date: 2026-11-15
+series: This site
+cover: ../../assets/images/notes/moon-texture-map.jpg
+tags: [Three.js, WebGL, Shaders, Performance]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). The technical parts come from the code and commit history; check the framing. */}
+
+The first thing you see on my home page is a slowly turning Moon. Scroll, and it turns into Ceres, the dwarf planet in the asteroid belt. Move the mouse, and the Sun moves with it. These are the two worlds my research is about, so it felt right to put them on the front page.
+
+It looks simple. Getting it to look sharp and run smoothly on every device took more work than anything else on the site.
+
+## Built from real maps
+
+The globe is a sphere in [Three.js](https://threejs.org/), drawn with my own shaders. Its surfaces are real spacecraft data:
+
+- **The Moon:** a colour map and an elevation map from NASA's Lunar Reconnaissance Orbiter (the *CGI Moon Kit*, with elevation from the LOLA laser altimeter).
+- **Ceres:** the global mosaic and elevation map from NASA's Dawn mission.
+
+Each map is an *equirectangular* image (2,048 pixels wide, like the one at the top of this note) wrapped around the sphere. The elevation map is used twice: once to push the surface out and in, slightly exaggerated so the relief is visible at this size, and once to tilt the surface normals, so that crater rims catch the light.
+
+If a texture fails to load, a backup kicks in: a procedural surface with randomly placed craters, each a bowl with a raised rim. You should never see it, but the globe never comes up blank.
+
+## Shaded the way planetary scientists shade
+
+Most 3D graphics light surfaces with **Lambert's law**: brightness depends only on how directly the light hits. That's right for chalk or matte paint, and wrong for the Moon. A Lambert Moon looks like a ball: bright in the middle, dark at the edges.
+
+Real airless, dusty bodies are closer to the **Lommel–Seeliger law**, where brightness depends on both the incoming and the outgoing angle. It's the reason the full Moon looks like a flat coin, which I wrote about in [Why the full Moon looks flat](/notes/why-the-full-moon-looks-flat). The globe blends the two: about two-thirds Lommel–Seeliger and one-third Lambert. It's the same family of models I use for photometric correction in my research.
+
+One small decision: there's **no glowing rim**. An early version had an amber rim light, which looks nice on Earth-like planets. But airless worlds have no atmosphere to glow, and the rim lit up the terrain contours near the edge like a streak. It went.
+
+## The shimmer problem
+
+The first version had an ugly flaw: as the globe turned, the surface **shimmered and crawled**, like grain in old film. Two things caused it.
+
+**1. One texel per pixel.** On a laptop screen the globe is a few hundred pixels across, but the map is 2,048 pixels wide. Without help, each screen pixel picks just one pixel of the map. As the globe rotates, which one it picks changes from frame to frame, and the image flickers.
+
+The fix is **mipmaps**: the GPU keeps smaller, pre-blurred copies of the texture and picks the copy that matches the size on screen. Add **anisotropic filtering** (up to 8×) for the edges of the globe, where the surface is seen at a slant, and most of the crawl was gone.
+
+There was one catch. The shader computes map coordinates with `atan()`, which jumps from 0 to 1 at the seam where the map's edges meet. The GPU saw that jump as a huge change and picked the blurriest copy, so a soft line appeared down the globe. The fix was to compute the texture gradients myself and wrap the jump out of them before sampling.
+
+**2. Bumps measured too finely.** The surface tilt comes from the difference in height between neighbouring map pixels. Measured one map pixel apart, while each screen pixel covers several, those differences were mostly noise, and the lighting amplified it. Now the step is set by the pixel's **footprint** on the map, and the strength is scaled to match, so the relief looks the same at any size without the noise. The surface displacement reads from a softer copy of the map, so the shape itself doesn't jitter.
+
+## Smooth on any device
+
+A sphere with 256 × 256 segments and per-pixel lighting is no problem for a gaming laptop. For a budget phone, or a computer with graphics acceleration switched off, it's a slideshow. So the globe adapts.
+
+- **Phones start lighter:** fewer segments (128), no anti-aliasing, and a lower pixel density.
+- **Software rendering is detected.** If the browser reports a software renderer (such as SwiftShader or llvmpipe), meaning there's no real GPU behind WebGL, the globe starts at a tiny resolution with 64 segments.
+- **Resolution follows the frame rate.** The globe averages its frame time over 40 frames. If two windows in a row are too slow (over 27 ms per frame), it lowers its resolution a step, and if that isn't enough, it starts drawing only every second or third frame. One slow window doesn't count, so a brief hitch while scrolling doesn't blur the globe for good.
+- **And it recovers.** After four healthy windows it climbs back up a step, but never past a level that already proved too slow. Without this, the globe would drop to low resolution during a scroll and stay blurry.
+- **The page helps too.** When the globe decides a device is struggling, it tells the page, which turns off its own smooth-scrolling layer and falls back to native scrolling.
+
+## Loading without a pop
+
+The Moon's two maps load first. Ceres is only needed once you scroll, so its maps load after the Moon is done and never delay the first view. The globe fades in when the Moon is ready, or after 3.5 seconds at most, so a slow network never leaves an empty space on the page.
+
+None of this is visible when it works. That's the point.

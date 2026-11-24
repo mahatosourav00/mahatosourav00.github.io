@@ -1,15 +1,18 @@
 ---
 import Article from '../../layouts/Article.astro';
-import { getCollection, render } from 'astro:content';
+import Media from '../../components/Media.astro';
+import { getEntries, render } from 'astro:content';
+import { getNotes } from '../../lib/notes';
 import 'katex/dist/katex.min.css';
 
 export async function getStaticPaths() {
-  const notes = await getCollection('notes', (n) => !n.data.draft);
+  const notes = await getNotes();
   return notes.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
+const builds = await getEntries(d.builds);
 const words = (entry.body ?? '').split(/\s+/).length;
 const minutes = Math.max(1, Math.round(words / 220));
 const date = d.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -17,9 +20,38 @@ const date = d.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long',
 <Article
   title={d.title}
   description={d.description}
-  eyebrow="Note"
+  eyebrow={`Note · ${d.series}${d.draft ? ' · Draft, not published' : ''}`}
   back={{ href: '/notes', label: 'All notes' }}
   meta={[{ k: 'Published', v: date }, { k: 'Reading time', v: `${minutes} min` }, { k: 'Tags', v: d.tags.join(', ') }]}
 >
+  {d.cover && <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.title} ratio="21 / 9" eager sizes="100vw" /></div>}
+
   <Content />
+
+  {builds.length > 0 && (
+    <div slot="aside" class="side">
+      <p class="mono muted">{builds.length > 1 ? 'The builds' : 'The build'}</p>
+      <ul class="blist">
+        {builds.map((b) => (
+          <li>
+            <a href={`/projects/${b.id}`} class="bcard">
+              <span class="mono muted">{b.data.kind} · {b.data.year}</span>
+              <span class="bcard__t">{b.data.title} →</span>
+              <span class="muted bcard__s">Specs, photos and video of the finished build</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
 </Article>
+
+<style>
+  .side { position: sticky; top: 120px; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--surface); }
+  .blist { list-style: none; margin: 16px 0 0; padding: 0; }
+  .bcard { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .bcard .mono { font-size: 10px; }
+  .bcard__t { font-size: 17px; transition: color 0.3s; }
+  .bcard:hover .bcard__t { color: var(--accent); }
+  .bcard__s { font-size: 13px; }
+</style>

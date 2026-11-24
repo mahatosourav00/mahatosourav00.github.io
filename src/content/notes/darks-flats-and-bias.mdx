@@ -1,0 +1,70 @@
+---
+title: "Darks, flats and bias: why astrophotos need blank frames"
+description: Before a deep-sky photo is stacked, it's cleaned with three kinds of "blank" pictures. What each one removes, and how to shoot them with an ordinary mirrorless camera.
+date: 2026-11-18
+series: Explainer
+cover: ../../assets/images/astrophotography/andromeda-m31.jpg
+tags: [Astrophotography, Image processing, Siril]
+builds: [astro-tracker]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). The how-to-shoot tips are general; swap in your own routine if it differs (e.g. how you make flats). */}
+
+Anyone starting astrophotography runs into a strange instruction. After hours under the sky shooting a galaxy, you're told to shoot dozens more pictures of... nothing. A pitch-black frame with the lens cap on. A plain white frame. A frame as short as the camera allows.
+
+These are **calibration frames**, and they are why a stacked deep-sky photo looks clean instead of blotchy. Each one measures a flaw of the camera or telescope, so it can be removed from the real photos (the *lights*).
+
+## Why a camera needs correcting at all
+
+A deep-sky target is extremely faint. To pull it out, you stretch the image's brightness enormously, and stretching shows *everything*, including flaws you'd never notice in a daytime photo:
+
+- the sensor adds a little signal of its own, even in total darkness;
+- some pixels are much hotter than others;
+- the corners of the frame are darker than the middle;
+- every speck of dust on the sensor leaves a soft shadow.
+
+## Darks: the sensor's own noise
+
+A **dark frame** is taken with the lens cap on, at the *same exposure time, ISO and temperature* as your lights. With no light coming in, all it records is what the sensor makes by itself: **thermal signal** (dark current), which grows with exposure time and with heat, and **hot pixels** that glow on every frame.
+
+Subtract a stack of darks from each light, and those are gone.[^1]
+
+With an ordinary camera like my R10, temperature is the tricky part. The sensor isn't cooled, so it warms up during a long session and cools as the night goes on. Darks are best shot on the same night, in the same conditions, right after the lights.
+
+## Bias: the read-out pattern
+
+A **bias frame** is the shortest exposure the camera can take, also with the cap on. In such a short time there's no thermal signal at all, only the fixed electronic offset and pattern the sensor adds every time it is read.
+
+On their own, bias frames are mostly a helper: they are used to clean up the flats, and in some workflows the darks.[^2]
+
+## Flats: the optics' fingerprint
+
+A **flat frame** is a picture of an evenly lit, featureless surface: a light panel, a white T-shirt over the lens at dawn, or an evenly lit screen. It's taken *without changing anything* in the optical setup: same focus, same lens, same camera rotation.
+
+Because the light is even, any unevenness in the flat comes from the optics. It records **vignetting** (darker corners) and **dust shadows**, little doughnuts from specks on the sensor. Dividing each light by the flat lifts the dark corners and erases the doughnuts.[^3]
+
+If you refocus or rotate the camera, the dust shadows move, and old flats no longer match. That's why flats are taken every session.
+
+## Putting it together
+
+In simple form, each light is cleaned like this:[^4]
+
+$$
+\text{clean} = \frac{\text{light} - \text{dark}}{\text{flat} - \text{bias}}
+$$
+
+The flat is normalised first, so dividing by it only corrects the unevenness, without changing the overall brightness.
+
+Each kind of calibration frame is itself a stack of many, often 20 or more darks, flats and bias frames are averaged into a *master* frame each. A single calibration frame is noisy, and subtracting noise adds noise. Averaging many keeps the correction clean.[^2]
+
+Stacking software like **Siril** or **DeepSkyStacker** does all of this for you: give it the four folders, and it calibrates every light, aligns them, and stacks them into one.
+
+## Is it worth the trouble?
+
+Shooting calibration frames is the least exciting part of the hobby: no stars, no targets, just the cap on and the camera clicking. But it's the difference between a galaxy you can stretch and one that falls apart into gradients, dust rings and coloured speckles when you try. A few minutes of "nothing" at the end of the night can save hours of fighting in processing.
+
+[^1]: *Understanding and using dark frames in astrophotography*, BBC Sky at Night Magazine. [skyatnightmagazine.com](https://www.skyatnightmagazine.com/astrophotography/astrophoto-tips/understanding-using-dark-frames-astrophotography/)
+[^2]: Siril documentation, *Calibration*. [siril.readthedocs.io](https://siril.readthedocs.io/en/stable/preprocessing/calibration.html)
+[^3]: *The Ultimate Guide to Calibration Frames for Astrophotography*, Celestron. [celestron.com](https://www.celestron.com/blogs/knowledgebase/the-ultimate-guide-to-calibration-frames-for-astrophotography)
+[^4]: Siril tutorial, *Manual pre-processing*. [siril.org/tutorials/tuto-manual](https://siril.org/tutorials/tuto-manual)

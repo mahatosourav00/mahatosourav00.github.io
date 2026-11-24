@@ -1,0 +1,58 @@
+---
+title: Why the full Moon looks flat
+description: At full Moon the shadows vanish, the disc looks like a flat coin, and it shines far brighter than a half Moon should. That is the opposition effect, and it's part of my research.
+date: 2026-11-23
+series: Explainer
+cover: ../../assets/images/astrophotography/full-moon.jpg
+tags: [Moon, Photometry, Hapke model, Research]
+builds: [goniometer]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). Check the physics framing matches how you'd explain it; edit freely. */}
+
+Look at a half Moon through binoculars, and the craters near the line between day and night stand out in sharp relief, every rim casting a long shadow. Look again at full Moon, and the relief is gone. The disc looks like a flat, bright coin, almost equally bright from the middle to the edge.
+
+And it is much brighter than you'd expect. A full Moon shows twice the lit area of a half Moon, but it is not twice as bright: estimates range from about **six to ten times**.[^1][^2] Some of that extra light comes from a single, slightly strange property of dusty surfaces.
+
+## Light that comes straight back
+
+Astronomers describe the geometry with the **phase angle**: the angle between the Sun and the observer, as seen from the surface. At half Moon it is about 90°. At full Moon the Sun is almost directly behind us, and the phase angle drops close to zero.
+
+As the phase angle approaches zero, rough, dusty surfaces brighten far faster than a smooth surface would. This sharp brightening is called the **opposition effect** or **opposition surge**.[^3] It isn't unique to the Moon: asteroids, the rings of Saturn and even a dry, grassy field show it.
+
+Two mechanisms are behind it.
+
+### 1. Shadow hiding
+
+The Moon's surface is **regolith**: a loose layer of dust and broken rock, full of tiny pores and pits. Light usually comes in at an angle, so every grain casts a small shadow onto its neighbours, and from most directions you see a mix of lit grains and shadows.
+
+But when the Sun is right behind you, every grain hides its own shadow behind itself. You see only lit surfaces. The darkness that normally speckles the soil simply disappears.[^3]
+
+### 2. Coherent backscatter
+
+The second mechanism is wave optics. Light bouncing around inside the regolith can follow a path through several grains and come back out. For every such path, there is an identical path in the reverse direction. Exactly back toward the source, the two waves arrive in step and **add up constructively**, so the light coming straight back is stronger than in any other direction.[^4]
+
+Which of the two matters more for the Moon has been argued over for decades. Laboratory work on Apollo soils pointed to coherent backscatter; later analyses gave shadow hiding a larger role. The common view today is that both contribute, with coherent backscatter dominating at the very smallest phase angles.[^3][^5]
+
+## Why the disc looks flat
+
+A white ball lit from behind you would look brightest in the middle and darker towards the edge, because the edge faces away from you. The full Moon doesn't do this: its limb is nearly as bright as its centre. Dusty, porous surfaces scatter light in a way that depends much less on the viewing angle than a smooth matte surface does, and with the shadows hidden there is no relief left to see. The result is a disc that looks like a flat coin.
+
+## Why this matters to my research
+
+Instruments in orbit, like the infrared spectrometer **IIRS** on Chandrayaan-2, see each patch of the Moon under a different combination of angles: where the Sun is, where the spacecraft is, how the ground is tilted. The same rock can look brighter or darker just because of those angles. Before comparing two places, the data has to be corrected to a standard geometry. That step is called **photometric correction**, and it's the problem I work on.
+
+The standard tool is **Hapke's model**, which describes how a grainy surface scatters light, with separate terms for the grains themselves, for light bouncing between grains, for the roughness of the surface, and for the opposition effect. You can play with a simplified version of it on my [Play page](/play): drag the phase angle towards zero and watch the surge appear.
+
+Models need to be checked against reality. That's why I'm building a [motorized goniometer](/projects/goniometer): it lights a sample from any angle and measures it from any other, so I can measure how real soil-like samples behave, including near opposition, and test the model against them.
+
+## Try it yourself
+
+Next full Moon, look for two things. Notice how flat and evenly bright the disc is. Then, on a sunny day, stand with the Sun behind you over a dry lawn or a dusty field and look at the shadow of your head. The faint glow around it is shadow hiding, the same effect, at your feet. (On dewy grass the glow gets much stronger, because the drops act like tiny lenses and send light straight back. That version has its own name: *heiligenschein*.)
+
+[^1]: J. Palmer, *Lunacy*, University of Arizona, College of Optical Sciences: a perfectly diffuse Moon would give a full-to-quarter ratio of π, but the real ratio is closer to 10. [wp.optics.arizona.edu/jpalmer/interests/lunacy](https://wp.optics.arizona.edu/jpalmer/interests/lunacy)
+[^2]: *Why is the Moon bright?*, The Conversation: the full Moon is roughly six times brighter than the half Moon. [theconversation.com](https://theconversation.com/why-is-the-moon-bright-is-easter-a-full-moon-how-long-does-a-full-moon-last-your-moon-questions-answered-by-an-astronomer-158061)
+[^3]: *Opposition surge*, Wikipedia. [en.wikipedia.org/wiki/Opposition_surge](https://en.wikipedia.org/wiki/Opposition_surge)
+[^4]: *Coherent Backscatter*, Apollo Lunar Surface Journal, NASA. [nasa.gov](https://www.nasa.gov/wp-content/uploads/static/history/alsj/coherentbcksctr.html)
+[^5]: Hapke, B. et al., *The Lunar Opposition Effect Revisited*, DPS 1996. [ui.adsabs.harvard.edu](https://ui.adsabs.harvard.edu/abs/1996DPS....28.1705H/abstract)

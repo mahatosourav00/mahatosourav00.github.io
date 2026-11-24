@@ -2,19 +2,34 @@
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import Media from '../../components/Media.astro';
+import Video from '../../components/Video.astro';
+import MakingChain from '../../components/MakingChain.astro';
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import { showreel } from '../../data/showreel';
 
 const allAlbums = await getCollection('albums');
 const albums = allAlbums.filter((a) => !a.data.parent).sort((a, b) => a.data.order - b.data.order);
 const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allAlbums.filter((c) => c.data.parent === a.id).reduce((n, c) => n + c.data.items.length, 0);
 ---
-<Base title="Hobbies" description="Astrophotography, photography, FPV cinematics and 3D printing by Sourav Mahato.">
+<Base title="Hobbies" description="FPV drones, astrophotography, 3D printing and photography by Sourav Mahato, and how building things led to all of them.">
   <PageHeader
     eyebrow="Hobbies"
     title="What I do"
     italic="after hours."
-    lead="Most of my hobbies end up feeding my research, and most of my research started as a hobby. Here's the overlap."
+    lead="Drones, the night sky, 3D printing and photography. Tap anything to dive in."
   />
+
+  <section class="wrap reel" aria-label="Highlights">
+    {showreel.map((t, i) => (
+      <a href={t.href} class:list={['tile', { 'tile--big': i === 0 }]} data-cursor="Open" data-reveal data-delay={String(0.05 * i)}>
+        {t.video
+          ? <Video src={t.video} poster={t.img} alt={t.title} mode="ambient" />
+          : <Image src={t.img} alt={t.title} widths={i === 0 ? [800, 1200, 1800] : [400, 640, 900]} sizes={i === 0 ? '(max-width: 800px) 100vw, 40vw' : '(max-width: 800px) 50vw, 20vw'} loading={i < 3 ? 'eager' : 'lazy'} class="tile__img" />}
+        <span class="tile__cap"><span class="mono tile__label">{t.label}</span><span class="tile__title">{t.title}</span></span>
+      </a>
+    ))}
+  </section>
 
   <section class="wrap doors">
     {albums.map((a, i) => {
@@ -57,15 +72,31 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
     })}
   </section>
 
+  <MakingChain />
+
   <section class="section wrap more">
     <p class="eyebrow" data-reveal>Also into</p>
     <ul class="also" data-reveal>
-      <li>Home automation</li><li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
+      <li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
     </ul>
   </section>
 </Base>
 
 <style>
+  .reel { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: clamp(150px, 15vw, 230px); gap: clamp(8px, 1vw, 14px); margin-bottom: clamp(64px, 9vw, 120px); }
+  .tile { position: relative; overflow: hidden; border-radius: var(--radius); background: var(--surface); display: block; }
+  .tile--big { grid-column: span 2; grid-row: span 2; }
+  .tile :global(.tile__img), .tile :global(.vid) { position: absolute; inset: 0; width: 100%; height: 100% !important; aspect-ratio: auto !important; object-fit: cover; border-radius: 0; transition: transform 0.8s var(--ease); }
+  .tile:hover :global(.tile__img), .tile:hover :global(.vid) { transform: scale(1.04); }
+  .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, #000c 0%, #0000 45%); pointer-events: none; }
+  .tile__cap { position: absolute; left: 14px; right: 14px; bottom: 12px; z-index: 1; display: flex; flex-direction: column; gap: 2px; color: #fff; }
+  .tile__label { font-size: 10px; color: var(--accent); }
+  .tile__title { font-size: 14px; line-height: 1.3; }
+  .tile--big .tile__title { font-family: var(--font-display); font-size: clamp(22px, 2.4vw, 34px); }
+  @media (max-width: 800px) {
+    .reel { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; }
+    .tile--big { grid-row: span 2; }
+  }
   .doors { display: grid; border-top: 1px solid var(--line); }
   .door { display: grid; grid-template-columns: 60px 1fr 1fr; gap: clamp(20px, 4vw, 60px); align-items: center; padding: clamp(40px, 6vw, 80px) 0; border-bottom: 1px solid var(--line); }
   .door__i { align-self: start; }
@@ -76,6 +107,7 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   .sub__meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 12px; }
   .sub:hover h3 { color: var(--accent); }
   .sub h3 { transition: color 0.3s; }
+  .sub__from { margin: 8px 0 0; font-size: 10px; }
   .door__title { margin: 12px 0 20px; transition: color 0.4s, transform 0.6s var(--ease); }
   .door:hover .door__title { color: var(--accent); transform: translateX(12px); }
   .door__intro { max-width: 40ch; }

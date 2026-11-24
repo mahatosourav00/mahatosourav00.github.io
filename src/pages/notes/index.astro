@@ -1,24 +1,61 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import { getCollection } from 'astro:content';
+import Media from '../../components/Media.astro';
+import { getNotes, SERIES } from '../../lib/notes';
 
-const notes = (await getCollection('notes', (n) => !n.data.draft)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const all = await getNotes();
+const pinned = all.filter((n) => n.data.pinned);
+const notes = all.filter((n) => !n.data.pinned);
+const series = SERIES.filter((s) => notes.some((n) => n.data.series === s));
 const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+const minutes = (body = '') => Math.max(1, Math.round(body.split(/\s+/).length / 220));
 ---
-<Base title="Notes" description="Build logs, how-tos and research explainers by Sourav Mahato.">
-  <PageHeader eyebrow="Notes" title="Field notes" italic="& build logs." lead="Write-ups of things I've built, tools I use and the science behind my research, explained simply." />
+<Base title="Notes" description="Stories, build logs, science explainers and how-tos by Sourav Mahato.">
+  <PageHeader eyebrow="Notes" title="Field notes" italic="& build logs." lead="The stories behind the builds, the science behind the research, and the how-tos I wish I'd had." />
   <section class="wrap">
+    {pinned.map((n) => (
+      <a href={`/notes/${n.id}`} class="start" data-cursor="Read" data-reveal data-immediate data-delay="0.35">
+        <div class="start__media">
+          {n.data.cover && <Media src={n.data.cover} alt="" label={n.data.title} ratio="16 / 10" sizes="(max-width: 800px) 100vw, 50vw" reveal={false} eager />}
+        </div>
+        <div class="start__body">
+          <p class="mono start__eyebrow">
+            <span class="accent">Start here</span>
+            <span class="muted">{n.data.series} · {minutes(n.body)} min</span>
+            {n.data.draft && <span class="draft">Draft</span>}
+          </p>
+          <h2 class="start__t">{n.data.title}</h2>
+          <p class="muted">{n.data.description}</p>
+          <span class="mono start__go">Read the story →</span>
+        </div>
+      </a>
+    ))}
+    {series.length > 1 && (
+      <div class="filters" role="group" aria-label="Filter notes" data-reveal data-immediate data-delay="0.4">
+        {['All', ...series].map((s, i) => (
+          <button class:list={['filter', { 'is-on': i === 0 }]} data-filter={s} aria-pressed={i === 0 ? 'true' : 'false'}>{s}</button>
+        ))}
+      </div>
+    )}
     <ul class="nlist">
       {notes.map((n) => (
-        <li data-reveal>
+        <li data-reveal data-series={n.data.series}>
           <a href={`/notes/${n.id}`} class="nrow" data-cursor="Read">
-            <span class="mono muted">{fmt(n.data.date)}</span>
+            <div class="nrow__media">
+              {n.data.cover
+                ? <Media src={n.data.cover} alt="" label={n.data.title} ratio="4 / 3" sizes="220px" reveal={false} />
+                : <span class="nrow__ph mono accent" aria-hidden="true">{n.data.series}</span>}
+            </div>
             <div>
+              <p class="mono nrow__eyebrow">
+                <span class="accent">{n.data.series}</span>
+                <span class="muted">{fmt(n.data.date)} · {minutes(n.body)} min</span>
+                {n.data.draft && <span class="draft">Draft</span>}
+              </p>
               <h2 class="nrow__t">{n.data.title}</h2>
               <p class="muted">{n.data.description}</p>
             </div>
-            <span class="tags">{n.data.tags.map((t) => <span class="tag">{t}</span>)}</span>
           </a>
         </li>
       ))}
@@ -28,13 +65,48 @@ const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 
   <div class="section"></div>
 </Base>
 
+<script>
+  import { ScrollTrigger } from '../../lib/motion';
+  function init() {
+    const btns = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+    const items = document.querySelectorAll<HTMLElement>('[data-series]');
+    btns.forEach((b) =>
+      b.addEventListener('click', () => {
+        const s = b.dataset.filter;
+        btns.forEach((x) => { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+        items.forEach((it) => { it.hidden = !(s === 'All' || it.dataset.series === s); });
+        ScrollTrigger.refresh();
+      }),
+    );
+  }
+  document.addEventListener('astro:page-load', init);
+</script>
+
 <style>
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+  .filter { padding: 9px 16px; border: 1px solid var(--line-strong); border-radius: 999px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); transition: all 0.3s var(--ease); }
+  .filter:hover { color: var(--text); }
+  .filter.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .start { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(24px, 4vw, 56px); align-items: center; padding: clamp(20px, 3vw, 32px); margin-bottom: clamp(48px, 7vw, 88px); border: 1px solid var(--line); border-radius: var(--radius); background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%), var(--surface); transition: border-color 0.4s; }
+  .start:hover { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+  .start__media { border-radius: var(--radius); overflow: hidden; }
+  .start__eyebrow { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin: 0 0 14px; font-size: 11px; }
+  .start__t { font-size: clamp(30px, 3.6vw, 52px); line-height: 1.08; margin-bottom: 16px; transition: color 0.3s; }
+  .start:hover .start__t { color: var(--accent); }
+  .start__body p.muted { margin: 0; max-width: 46ch; }
+  .start__go { display: inline-block; margin-top: 24px; font-size: 12px; color: var(--accent); }
+  @media (max-width: 800px) { .start { grid-template-columns: 1fr; } }
   .nlist { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
-  .nrow { display: grid; grid-template-columns: 140px 1fr auto; gap: 28px; padding: 36px 0; border-bottom: 1px solid var(--line); align-items: start; }
-  .nrow__t { font-size: clamp(28px, 3vw, 44px); margin-bottom: 12px; transition: color 0.3s; }
+  .nlist li[hidden] { display: none; }
+  .nrow { display: grid; grid-template-columns: 220px 1fr; gap: clamp(20px, 3vw, 40px); padding: 32px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  .nrow__media { border-radius: var(--radius); overflow: hidden; }
+  .nrow__ph { display: grid; place-items: center; aspect-ratio: 4 / 3; border: 1px solid var(--line); border-radius: var(--radius); font-size: 11px; background: radial-gradient(circle, color-mix(in srgb, var(--text) 9%, transparent) 1px, transparent 1.5px) 0 0 / 18px 18px, var(--surface); }
+  .nrow__eyebrow { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin: 0 0 12px; font-size: 11px; }
+  .draft { padding: 3px 9px; border-radius: 999px; border: 1px dashed var(--accent); color: var(--accent); }
+  .nrow__t { font-size: clamp(26px, 2.8vw, 40px); margin-bottom: 12px; transition: color 0.3s; }
   .nrow:hover .nrow__t { color: var(--accent); }
-  .nrow p { margin: 0; max-width: 60ch; }
-  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 240px; }
+  .nrow p { margin: 0; max-width: 62ch; }
+  .nrow .nrow__eyebrow { margin-bottom: 12px; }
   .soon { margin-top: 32px; }
-  @media (max-width: 800px) { .nrow { grid-template-columns: 1fr; gap: 12px; } .tags { justify-content: flex-start; } }
+  @media (max-width: 700px) { .nrow { grid-template-columns: 1fr; gap: 16px; } .nrow__media { max-width: 360px; } }
 </style>

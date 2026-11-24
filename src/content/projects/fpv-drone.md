@@ -26,6 +26,12 @@ gallery:
   - { src: ../../assets/images/fpv-cinematics/campus-flyover.jpg, video: /videos/fpv/campus-flyover.mp4, caption: "Campus flyover", group: "In the air" }
 ---
 
+## How it started
+
+An FPV drone had been a dream since I was a child. When I finally started in 2019, my only income was a ₹5,000-a-month scholarship. So I planned the whole build on paper first, then saved for months at a time to buy one part, and then the next. It first flew in 2020.
+
+Building it taught me the FPV world from the inside: **Betaflight** and **INAV** flight firmware, **OpenTX** on the radio, **ExpressLRS** links and motor protocols. It has been upgraded ever since: analog video to digital, a basic camera to a GoPro and then a de-cased one, and a radio modded to run on Li-ion cells and take an external transmitter module.
+
 ## Build
 
 - Scratch-built frame and power system reaching a **6:1 power-to-weight ratio**.

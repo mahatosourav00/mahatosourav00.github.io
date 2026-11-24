@@ -21,7 +21,7 @@ export const site = {
     { label: 'Research', href: '/research' },
     { label: 'Builds', href: '/projects' },
     { label: 'Hobbies', href: '/hobbies' },
-    { label: 'Lab', href: '/lab' },
+    { label: 'Play', href: '/play' },
     { label: 'Notes', href: '/notes' },
     { label: 'Journey', href: '/journey' },
   ],

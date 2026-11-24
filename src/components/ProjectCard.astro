@@ -10,9 +10,28 @@ const { project, index } = Astro.props;
 const d = project.data;
 // Follow the cover's own shape (between 4:5 and 4:3) so landscape photos aren't chopped into tall slivers.
 const r = d.cover ? Math.min(1.333, Math.max(0.8, d.cover.width / d.cover.height)).toFixed(3) : '0.8';
+// No photo yet: a typographic tile with the build's headline facts instead of an empty placeholder.
+const facts = d.facts.length > 0 ? d.facts : d.specs.slice(0, 2).map((s) => ({ v: s.v, k: s.k }));
+const action = d.links[0]?.label.split(' ')[0]; // "Download", "Try", ...
+const inProgress = d.status === 'in-progress';
 ---
 <a href={`/projects/${project.id}`} class="pcard" data-cursor="View" data-reveal>
-  <Media src={d.cover} alt={d.title} label={d.title} ratio={r} reveal={false} sizes="(max-width: 800px) 85vw, 420px" />
+  <div class="pcard__media">
+    {d.cover ? (
+      <Media src={d.cover} alt={d.title} label={d.title} ratio={r} reveal={false} sizes="(max-width: 800px) 85vw, 420px" />
+    ) : (
+      <div class="ptype" style={`aspect-ratio:${r}`} role="img" aria-label={`${d.title}: ${facts.map((f) => `${f.v} ${f.k}`).join(', ')}`}>
+        <span class="mono accent ptype__kind">{d.kind}</span>
+        <dl class="ptype__facts">
+          {facts.map((f) => (
+            <div><dt class="ptype__v">{f.v}</dt><dd class="mono muted ptype__k">{f.k}</dd></div>
+          ))}
+        </dl>
+        {action && <span class="mono ptype__act">{action === 'Try' ? '↗ Try it' : action === 'Download' ? '↓ Download' : `↗ ${action}`}</span>}
+      </div>
+    )}
+    {inProgress && <span class="mono pcard__badge"><i></i>In progress</span>}
+  </div>
   <div class="pcard__meta">
     <span class="mono muted">{index !== undefined ? String(index + 1).padStart(2, '0') + ' · ' : ''}{d.kind}</span>
     <span class="mono muted">{d.year}</span>
@@ -23,8 +42,36 @@ const r = d.cover ? Math.min(1.333, Math.max(0.8, d.cover.width / d.cover.height
 
 <style>
   .pcard { display: block; }
+  .pcard__media { position: relative; }
   .pcard__meta { display: flex; justify-content: space-between; gap: 12px; margin: 18px 0 8px; }
   .pcard__title { font-size: clamp(26px, 2.4vw, 34px); transition: color 0.3s; }
   .pcard:hover .pcard__title { color: var(--accent); }
   .pcard__sum { font-size: 15px; margin-top: 10px; max-width: 42ch; }
+
+  .ptype {
+    position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
+    padding: clamp(20px, 2.4vw, 32px); border: 1px solid var(--line); border-radius: var(--radius);
+    background:
+      radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+      radial-gradient(circle, color-mix(in srgb, var(--text) 9%, transparent) 1px, transparent 1.5px) 0 0 / 18px 18px,
+      var(--surface);
+    transition: border-color 0.4s;
+  }
+  .pcard:hover .ptype { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+  .ptype__kind { font-size: 10px; }
+  .ptype__facts { margin: 0; display: grid; gap: clamp(18px, 2vw, 28px); }
+  .ptype__v { font-family: var(--font-display); font-size: clamp(34px, 3.6vw, 54px); line-height: 1; letter-spacing: -0.01em; }
+  .ptype__k { margin: 8px 0 0; font-size: 11px; text-transform: none; letter-spacing: 0.02em; }
+  .ptype__act { align-self: flex-start; padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: 999px; font-size: 11px; transition: border-color 0.3s, color 0.3s; }
+  .pcard:hover .ptype__act { border-color: var(--accent); color: var(--accent); }
+
+  .pcard__badge {
+    position: absolute; top: 14px; left: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(6px);
+    border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); color: var(--text); font-size: 10px;
+  }
+  .pcard__badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+  .pcard__media:has(.ptype) .pcard__badge { top: auto; bottom: clamp(20px, 2.4vw, 32px); left: auto; right: clamp(20px, 2.4vw, 32px); }
+  @keyframes pulse { 50% { opacity: 0.35; } }
+  @media (prefers-reduced-motion: reduce) { .pcard__badge i { animation: none; } }
 </style>

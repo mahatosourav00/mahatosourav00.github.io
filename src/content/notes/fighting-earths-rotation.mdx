@@ -1,0 +1,47 @@
+---
+title: Fighting Earth's rotation
+description: Why stars smear in long exposures, how fast it happens with my camera, and why that pushed me from a one-axis tracker to a guided GoTo mount.
+date: 2025-06-15
+series: Explainer
+cover: ../../assets/images/astrophotography/orion-nebula-m42.jpg
+tags: [Astrophotography, Physics, Tracking]
+builds: [astro-tracker]
+---
+
+Earth spins at about 15 arcseconds per second. That sounds tiny, until you work out what it means on a camera sensor. Long-exposure astrophotography is mostly a fight against that number.
+
+> A good mount matters more than a good camera.
+
+## How fast does a star move on the sensor?
+
+One pixel covers a small patch of sky, set by the pixel size $p$ and the focal length $f$:
+
+$$
+\text{plate scale} = 206.265 \times \frac{p\ [\mu\text{m}]}{f\ [\text{mm}]}\ \text{arcsec per pixel}
+$$
+
+My Canon R10 has pixels about 3.7 µm wide. At the long end of a 250 mm lens, that is roughly **3 arcseconds per pixel**. A star near the celestial equator therefore crosses about **5 pixels every second**. Without tracking, a sharp star at 250 mm allows well under a second of exposure.
+
+At a wide 18 mm, the same sensor sees about 42 arcseconds per pixel, so a star takes nearly 3 seconds to cross one pixel. That is why untracked wide-field shots work, and telephoto ones do not. (Stars near the pole move slower, by a factor of $\cos\delta$ for declination $\delta$, but most interesting targets are not there.)
+
+## The fix: turn with the sky
+
+An **equatorial mount** rotates around one axis parallel to Earth's axis. Once it is aligned with the celestial pole, cancelling the sky's motion needs just one motor turning at the *sidereal rate*:
+
+$$
+\omega_\star = \frac{2\pi}{86164.1\ \text{s}} \approx 7.29 \times 10^{-5}\ \text{rad/s}
+$$
+
+That is one turn per sidereal day, about 4 minutes shorter than a solar day, because Earth also moves along its orbit.
+
+## Why one axis was not enough
+
+My first tracker turned one axis at exactly this rate. For wide-field shots like the Milky Way, it was plenty: at 42 arcseconds per pixel, small tracking errors stay inside a pixel.
+
+At 250 mm the same errors are 14 times bigger on the sensor. Imperfect polar alignment, gear wobble and flex all show up as drift. Turning at the right rate is not enough any more; something has to **measure** the error and correct it. That led to the second build, with a second axis to point at targets, automatic polar alignment, and a guide camera that watches a star and nudges the motors whenever it drifts.
+
+## What I learned
+
+- Backlash is the enemy. Preload everything.
+- Periodic error from printed gears is real, but guiding hides most of it.
+- Calibration frames (darks, flats, bias) matter as much as the mount.

@@ -4,6 +4,10 @@ kind: "Research instrument"
 year: "2026"
 order: 1
 featured: true
+status: "in-progress"
+facts:
+  - { v: "3 axes", k: "incidence · emission · azimuth" }
+  - { v: "Chandrayaan-2", k: "IIRS photometric correction" }
 summary: "A computer-controlled rig that measures how light scatters from a surface at any incidence, emission and azimuth angle."
 tags: ["Stepper motors", "Python", "3D printing", "Optics"]
 specs:

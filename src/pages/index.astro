@@ -5,9 +5,11 @@ import Media from '../components/Media.astro';
 import portrait from '../assets/images/portrait.jpg';
 import { getCollection } from 'astro:content';
 import { site } from '../lib/site';
+import { getNotes } from '../lib/notes';
 
 const research = (await getCollection('research')).filter((r) => r.data.featured).sort((a, b) => a.data.order - b.data.order);
-const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+// The home strip shows hand-picked builds (`featured: true`): instruments, flying machines and apps.
+const projects = (await getCollection('projects')).filter((p) => p.data.featured).sort((a, b) => a.data.order - b.data.order);
 const allAlbums = await getCollection('albums');
 const albums = allAlbums.filter((a) => !a.data.parent).sort((a, b) => a.data.order - b.data.order);
 const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allAlbums.filter((c) => c.data.parent === a.id).reduce((n, c) => n + c.data.items.length, 0);
@@ -15,6 +17,10 @@ const pubs = (await getCollection('publications'))
   .filter((p) => p.data.type === 'paper' || p.data.type === 'talk')
   .sort((a, b) => parseInt(b.data.year) - parseInt(a.data.year))
   .slice(0, 6);
+
+// Newest notes for the home page (published only on the live site; the row hides itself when there are none).
+const latestNotes = (await getNotes()).slice(0, 3);
+const noteDate = (d: Date) => d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
 const stats = [
   { n: '4', l: 'Planetary missions worked with' },
@@ -77,9 +83,13 @@ const stats = [
       <div>
         <p class="eyebrow" data-reveal>About</p>
         <p class="about__big" data-split>
-          Half the time I'm deep in Python, cleaning up rough data beamed back from space missions. The other half I'm building things with my own hands: <span class="italic accent">spectrometers, trackers, drones.</span>
+          Half the time I'm deep in Python, cleaning up rough data beamed back from space missions. The other half I'm building things: <span class="italic accent">spectrometers, trackers, drones and apps.</span>
         </p>
         <p class="lead muted about__lead" data-reveal>I want to bring those two worlds together. I'm looking for a PhD where hardware and software meet planetary science.</p>
+        <a href="/hobbies#making" class="bridge" data-reveal>
+          <span class="mono accent">How one led to the other</span>
+          <span class="bridge__t">From a ₹5,000 scholarship to Chandrayaan-2 →</span>
+        </a>
         <div class="about__cta" data-reveal>
           <a href="/journey" class="btn">My journey →</a>
           <a href="/cv" class="btn">Résumé</a>
@@ -132,10 +142,10 @@ const stats = [
       <div class="builds__intro">
         <p class="eyebrow">The lab bench</p>
         <h2 class="display-l">Things I've <span class="italic accent">built.</span></h2>
-        <p class="muted builds__p">Low-cost instruments, robots and flying machines. Most of them 3D printed, all of them taken apart at least once.</p>
+        <p class="muted builds__p">Low-cost instruments, robots, flying machines and the apps I couldn't find. Most of the hardware 3D printed, all of it taken apart at least once.</p>
         <a href="/projects" class="btn">All builds →</a>
       </div>
-      {projects.slice(0, 7).map((p, i) => (
+      {projects.map((p, i) => (
         <div class="builds__card"><ProjectCard project={p} index={i} /></div>
       ))}
     </div>
@@ -163,6 +173,32 @@ const stats = [
   </section>
 
   <!-- ───── PUBLICATIONS ───── -->
+  {latestNotes.length > 0 && (
+    <section class="section notes-home">
+      <div class="wrap">
+        <div class="sec-head notes-home__head">
+          <div>
+            <p class="eyebrow" data-reveal>Notes</p>
+            <h2 class="display-l" data-split>Stories and <span class="italic">how-tos.</span></h2>
+          </div>
+          <a href="/notes" class="btn" data-reveal>All notes →</a>
+        </div>
+        <div class="ngrid">
+          {latestNotes.map((n) => (
+            <a href={`/notes/${n.id}`} class="ncard" data-cursor="Read" data-reveal>
+              {n.data.cover
+                ? <Media src={n.data.cover} alt="" label={n.data.title} ratio="3 / 2" sizes="(max-width: 800px) 100vw, 30vw" />
+                : <span class="ncard__ph mono accent" aria-hidden="true">{n.data.series}</span>}
+              <p class="mono ncard__meta"><span class="accent">{n.data.series}</span><span class="muted">{noteDate(n.data.date)}</span></p>
+              <h3 class="ncard__t">{n.data.title}</h3>
+              <p class="muted ncard__d">{n.data.description}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
   <section class="section pubs">
     <div class="wrap pubs__grid">
       <div>
@@ -460,4 +496,18 @@ const stats = [
   .pitem__t { margin: 0 0 6px; font-size: 18px; line-height: 1.35; }
   .pitem .mono.muted { margin: 0; text-transform: none; letter-spacing: 0; }
   @media (max-width: 800px) { .pubs__grid { grid-template-columns: 1fr; } .pitem { grid-template-columns: 54px 1fr; } .pitem .tag { display: none; } }
+  .bridge { display: inline-flex; flex-direction: column; gap: 6px; margin-top: 28px; padding: 16px 20px; border: 1px solid var(--line); border-radius: var(--radius); transition: border-color 0.3s; }
+  .bridge .mono { font-size: 10px; }
+  .bridge__t { font-family: var(--font-display); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; transition: color 0.3s; }
+  .bridge:hover { border-color: var(--accent); }
+  .bridge:hover .bridge__t { color: var(--accent); }
+  .notes-home__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+  .ngrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 40px); }
+  .ncard { display: block; }
+  .ncard__ph { display: grid; place-items: center; aspect-ratio: 3 / 2; border: 1px solid var(--line); border-radius: var(--radius); font-size: 11px; background: radial-gradient(circle, color-mix(in srgb, var(--text) 9%, transparent) 1px, transparent 1.5px) 0 0 / 18px 18px, var(--surface); }
+  .ncard__meta { display: flex; gap: 14px; margin: 16px 0 8px; font-size: 11px; }
+  .ncard__t { font-size: clamp(22px, 2vw, 28px); line-height: 1.2; transition: color 0.3s; }
+  .ncard:hover .ncard__t { color: var(--accent); }
+  .ncard__d { font-size: 15px; margin-top: 10px; }
+  @media (max-width: 900px) { .ngrid { grid-template-columns: 1fr; } }
 </style>

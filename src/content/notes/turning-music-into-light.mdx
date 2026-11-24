@@ -1,0 +1,74 @@
+---
+title: Turning music into light, sixty times a second
+description: Inside LedFx Mobile's audio engine, from a phone's microphone to a beat-locked light show on WLED lamps, in about 46 milliseconds of sound per frame.
+date: 2026-11-17
+series: Build log
+cover: ../../assets/images/projects/iot-lighting/skyline-lamp.jpg
+tags: [LedFx Mobile, Audio DSP, Android, WLED]
+builds: [ledfx-mobile, iot-lighting]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). Technical details come from the LedFx Mobile source. Like Mosaic Studio, was this written with Claude's help? If so, I'll add the same honest line here. */}
+
+My [smart lamps](/projects/iot-lighting) dance to music. For a long time that needed **LedFx** running on a PC, so I wrote [LedFx Mobile](/projects/ledfx-mobile) to do it from a phone. Making lights react to music *well* turns out to be a small signal-processing problem. Here is how the app solves it, sixty times every second.
+
+## 1. Listening
+
+The app can listen in two ways:
+
+- **The microphone**, using Android's *unprocessed* audio source. The normal microphone mode is tuned for voice calls: it adds automatic gain and noise suppression, which squash music flat. Unprocessed audio keeps the punch of the drums.
+- **Phone audio**: the sound of Spotify or YouTube playing on the phone itself, captured directly with Android's playback-capture feature. It arrived in Android 10, which is why the app needs Android 10 or newer. Some streaming apps block it for copyright reasons; for those, the microphone still works.
+
+Audio arrives at 44,100 samples per second, in 10-millisecond chunks, into a rolling buffer.
+
+## 2. From sound to frequencies
+
+Every frame, the engine takes the most recent **2,048 samples**, about 46 ms of sound, smooths the edges with a Hann window, and runs a **Fast Fourier Transform (FFT)**. That turns a wiggly sound wave into a list of how loud each frequency is.
+
+An FFT gives about a thousand frequency bins, spaced evenly. But we don't hear evenly: the gap from 100 to 200 Hz sounds as big as the gap from 1,000 to 2,000 Hz. So the bins are grouped into **32 bands spaced on a log scale**, from 35 Hz up to 16 kHz, like the keys of a piano.
+
+Three tricks make those bands look good on lights:
+
+- **Tilt.** Real music has much more energy in the bass than in the treble. Without correction, the highs would hardly move. Each band gets a small boost the higher it is.
+- **Adaptive gain.** The engine tracks the loudest recent level and shows a 42 dB window below it. A quiet song and a loud one both fill the lights, and when the music gets louder the window follows at once, then relaxes slowly.
+- **Fast up, slow down.** Each band jumps up quickly when the sound rises and falls back gently. That's what makes lights feel punchy instead of flickery.
+
+The bands are also summed into four ranges, the same ones LedFx uses: **beat** (below 100 Hz), **bass**, **mids** and **highs**.
+
+## 3. Hearing the beat
+
+Many effects pulse on the kick drum, so the engine detects it:
+
+- It keeps the bass energy of the last **43 frames**, about 0.7 seconds.
+- A kick is a frame whose bass energy jumps well above that recent average. How far above depends on the music: when the bass jumps around a lot, with clear punchy kicks, the bar is lower; when the bass is a steady drone, the bar is higher, so a constant bassline isn't mistaken for drums.
+- After a kick, it waits at least 280 ms before it will call another, so one drum hit is never counted twice.
+
+A second detector looks for **onsets**, any sudden change, like a snare or a new chord. It measures how much the spectrum *rose* since the last frame (the *spectral flux*) and flags frames well above the recent norm.
+
+## 4. Keeping time
+
+Kicks alone are too jumpy for effects that sweep across a strip in time with the music. They need a steady **beat grid**, so the engine runs a small tempo tracker:
+
+- It measures the time between kicks, ignores gaps that are too short or too long, and folds double-time and half-time gaps back to the current tempo.
+- It takes the **median** of the last eight, so one odd gap can't throw it, and keeps the tempo between 70 and 190 BPM.
+- The grid keeps ticking even when a kick is missing. When a kick arrives a little early, the beat starts now; a little late, the grid is nudged; far off, the grid is re-anchored.
+
+From the grid, effects get the position inside the current beat, and inside a bar of four beats, so a light can sweep exactly once per bar.
+
+Finally, the engine estimates the **pitch** (the strongest peak between 80 Hz and 2 kHz, as a musical note) for effects that change colour with the melody.
+
+## 5. Painting the strip
+
+Now each lamp's chosen effect turns that analysis into a row of colours. All 39 effects are ported from LedFx's own source, so they behave the same, and read the same signals LedFx calls things like `volume_beat_now` and `beat_oscillator`. Then the engine applies the finishing touches: gradient roll, blur, mirror, reverse and brightness.
+
+## 6. Sending it to the lamp
+
+The colours travel to the lamps over Wi-Fi using **DDP**, a tiny protocol for streaming pixels that WLED understands:
+
+- Each packet carries up to **480 pixels** (1,440 bytes of colour), so one packet fits inside a single Wi-Fi frame.
+- Long strips are split across several packets, and the last one carries a *push* flag that tells WLED to show the whole frame at once, so a strip never shows half an old frame and half a new one.
+
+All of that, from sound to light, happens 60 times a second, on a phone.
+
+{/* QUESTION: Any part that was hard to get right (kick detection on different genres, Wi-Fi lag)? A real story would make a great closing section. */}

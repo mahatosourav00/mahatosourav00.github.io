@@ -4,8 +4,8 @@ kind: "Independent"
 year: "2022–25"
 order: 8
 featured: false
-summary: "ESP32 and WLED ambient TV lighting and smart lamps with real-time audio visualization, integrated with Home Assistant."
-tags: ["ESP32", "WLED", "Home Assistant"]
+summary: "My home automation: ARGB smart lamps and Ambilight TV lighting on ESP32 and WLED, music-reactive with LedFx, Ambilight via HyperHDR, all in Home Assistant."
+tags: ["ESP32", "WLED", "LedFx", "HyperHDR", "Home Assistant"]
 specs:
   - { k: "MCU", v: "ESP32" }
   - { k: "Firmware", v: "WLED" }
@@ -26,7 +26,7 @@ gallery:
   - { src: ../../assets/images/projects/iot-lighting/v-led-ring.jpg, video: /videos/iot/led-ring.mp4, caption: "A ring of addressable LEDs", group: "Early tests & phone control" }
 ---
 
-Wi-Fi ambient TV lighting (a DIY Ambilight alternative) and smart lamps built on **ESP32 + WLED**, with real-time audio visualization and **Home Assistant** integration.
+My home automation: Wi-Fi ambient TV lighting (a DIY Ambilight alternative) and smart lamps built from **ARGB LEDs** on **ESP32 + WLED**, with real-time audio visualization through **LedFx**, an Ambilight driven by **HyperHDR**, and **Home Assistant** integration.
 
 ## How it started
 
@@ -34,10 +34,10 @@ In late 2022 I began with a strip of addressable LEDs on the bench: first chasin
 
 ## The builds
 
-- **Ambilight.** LEDs behind the monitor that follow the colours on screen and spill them onto the wall, which makes the screen look bigger and easier on the eyes at night.
+- **Ambilight.** LEDs behind the monitor, driven by **HyperHDR**, that follow the colours on screen and spill them onto the wall, which makes the screen look bigger and easier on the eyes at night.
 - **Skyline lamp.** Four strips sit in a printed tray under a cluster of white printed towers of different heights. They light up as a city skyline and react to music.
 - **Cylinder lamp.** A tall column of LED strips inside a printed diffuser shell. Its colour gradients look like a smooth rainbow with no visible dots.
-- **Audio-reactive mode.** The lamps pulse and sweep with whatever is playing.
+- **Audio-reactive mode.** With **LedFx**, the lamps pulse and sweep with whatever is playing. LedFx needs a PC, so I later wrote [LedFx Mobile](/projects/ledfx-mobile) to do the same from a phone.
 
 ## What I learned
 

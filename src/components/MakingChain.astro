@@ -1,0 +1,194 @@
+---
+// "How it all connects": a one-screen map of the making chain, with the full story behind a toggle.
+// Data: src/content/making.json (each step's `map` is its [column, row] on the map).
+import Media from './Media.astro';
+import { getImage } from 'astro:assets';
+import { getMaking } from '../lib/making';
+import { getNotes } from '../lib/notes';
+
+const steps = await getMaking();
+const stepById = new Map(steps.map((x) => [x.id, x]));
+const noteIds = new Set((await getNotes()).map((n) => n.id));
+const kindLabel = { build: 'Build', tool: 'Tool', hobby: 'Hobby', research: 'Research' } as const;
+
+const words = steps.reduce((n, s) => n + `${s.data.title} ${s.data.text} ${s.data.learned.join(' ')}`.split(/\s+/).length, 0);
+const readMin = Math.max(1, Math.round(words / 200));
+
+// Map geometry (SVG units)
+const COL = 120, ROW = 120, PAD_X = 70, TOP = 90, R = 30;
+const cols = Math.max(...steps.map((s) => s.data.map[0])) + 1;
+const W = PAD_X * 2 + (cols - 1) * COL;
+const rows = Math.max(...steps.map((s) => s.data.map[1])) + 1;
+const H = TOP + (rows - 1) * ROW + R + 40;
+const at = (s: (typeof steps)[number]) => ({ x: PAD_X + s.data.map[0] * COL, y: TOP + s.data.map[1] * ROW });
+
+const nodes = await Promise.all(
+  steps.map(async (s) => ({
+    s,
+    ...at(s),
+    thumb: s.image ? (await getImage({ src: s.image, width: 128, height: 128, fit: 'cover', format: 'webp' })).src : undefined,
+  })),
+);
+const edges = steps.flatMap((s) =>
+  s.data.from.filter((f) => f.onMap).map((f) => {
+    const a = at(stepById.get(f.id)!), b = at(s), mx = (a.x + b.x) / 2;
+    return { d: a.y === b.y ? `M${a.x} ${a.y}H${b.x}` : `M${a.x} ${a.y}C${mx} ${a.y} ${mx} ${b.y} ${b.x} ${b.y}`, research: s.data.kind === 'research' };
+  }),
+);
+---
+<section class="wrap chain" id="making" aria-labelledby="chain-title">
+  <div class="chain__head" data-reveal>
+    <p class="eyebrow">How it all connects</p>
+    <h2 class="display-l" id="chain-title">From a ₹5,000 scholarship <span class="italic accent">to <span class="nowrap">Chandrayaan-2.</span></span></h2>
+    <p class="muted chain__lead">Building things is my first and biggest hobby. Each build pulled in a new skill, tool or hobby. Two paths, one from drones and one from a camera, meet at the astro-tracker, and then run into my research. Along the way, one rule stuck: if the tool I want doesn't exist, isn't free or only runs on a PC, I build it, for everyone. Tap any step.</p>
+  </div>
+
+  <div class="map" data-reveal>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Map of how each build, tool and hobby grew out of the one before" class="map__svg">
+      <defs>
+        <clipPath id="node-clip" clipPathUnits="objectBoundingBox"><circle cx="0.5" cy="0.5" r="0.5" /></clipPath>
+      </defs>
+      {edges.map((e) => <path d={e.d} class:list={['edge', { 'edge--research': e.research }]} />)}
+      {nodes.map(({ s, x, y, thumb }) => {
+        const above = s.data.map[1] === 0;
+        return (
+          <a href={`#step-${s.id}`} class={`node node--${s.data.kind}`} data-step={s.id}>
+            <title>{`${s.data.year ? s.data.year + ' · ' : ''}${s.data.title}`}</title>
+            {s.data.kind === 'research' && <circle cx={x} cy={y} r={R + 7} class="node__halo" />}
+            <circle cx={x} cy={y} r={R} class="node__bg" />
+            {thumb && <image href={thumb} x={x - R} y={y - R} width={R * 2} height={R * 2} clip-path="url(#node-clip)" preserveAspectRatio="xMidYMid slice" />}
+            {!thumb && <text x={x} y={y + 4} class="node__ini">{s.data.short.split(' ').map((w) => w[0]).join('').slice(0, 2)}</text>}
+            <circle cx={x} cy={y} r={R} class="node__ring" />
+            <text x={x} y={above ? y - R - 14 : y + R + 22} class="node__label">{s.data.short}</text>
+          </a>
+        );
+      })}
+    </svg>
+  </div>
+  <p class="legend mono muted" data-reveal>
+    <span><i class="lg lg--build"></i>Build</span><span><i class="lg lg--research"></i>Research</span><span><i class="lg"></i>Tool or hobby</span>
+    <span class="legend__hint">Scroll sideways to see it all →</span>
+  </p>
+
+  <details class="story" id="chain-story">
+    <summary class="story__sum"><span class="display-s">Read the whole story</span><span class="mono muted">{steps.length} steps · about {readMin} min</span></summary>
+    <ol class="steps">
+      {steps.map((st) => {
+        const Tag = st.href ? 'a' : 'div';
+        return (
+          <li class={`step step--${st.data.kind}`} id={`step-${st.id}`}>
+            <span class="mono muted step__year">{st.data.year ?? ''}</span>
+            <span class="step__dot" aria-hidden="true"></span>
+            <div class="step__body">
+              <span class="mono accent">{kindLabel[st.data.kind]}</span>
+              <h3 class="display-s step__title">
+                {st.href ? <a href={st.href} class="step__link">{st.data.title} →</a> : st.data.title}
+              </h3>
+              {st.data.from.map((f) => (
+                <p class="mono muted step__from">↳ grew out of <a href={`#step-${f.id}`} class="link">{stepById.get(f.id)!.data.short}</a> · {f.via}</p>
+              ))}
+              <p class="step__text">{st.data.text}</p>
+              {st.data.note && noteIds.has(st.data.note.id) && <p class="step__note"><a href={`/notes/${st.data.note.id}`} class="link">Read the story →</a></p>}
+              {st.data.learned.length > 0 && <p class="step__learned">{st.data.learned.map((l) => <span class="tag">{l}</span>)}</p>}
+            </div>
+            <Tag class="step__media" {...(st.href ? { href: st.href, 'data-cursor': 'Open' } : {})}>
+              {st.image ? <Media src={st.image} alt={st.label} label={st.label} ratio="4 / 3" sizes="240px" reveal={false} /> : <span class="step__ph mono muted">{st.label}</span>}
+            </Tag>
+          </li>
+        );
+      })}
+    </ol>
+  </details>
+</section>
+
+<script>
+  // Map nodes, "grew out of" links and /hobbies#step-… links from build pages all open the story at that step.
+  function openAt(hash: string, smooth = true) {
+    if (!hash.startsWith('#step-')) return false;
+    const target = document.querySelector<HTMLElement>(hash);
+    const story = document.getElementById('chain-story') as HTMLDetailsElement | null;
+    if (!target || !story) return false;
+    story.open = true;
+    document.querySelectorAll('.step.is-current').forEach((el) => el.classList.remove('is-current'));
+    target.classList.add('is-current');
+    requestAnimationFrame(() => target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' }));
+    return true;
+  }
+  function init() {
+    document.querySelectorAll<HTMLAnchorElement>('#making a[href^="#step-"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const hash = a.getAttribute('href')!;
+        if (openAt(hash)) { e.preventDefault(); history.replaceState(null, '', hash); }
+      });
+    });
+    if (location.hash) openAt(location.hash, false);
+  }
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .chain { padding-block: clamp(64px, 9vw, 130px); border-top: 1px solid var(--line); }
+  .chain__head { max-width: 64ch; margin-bottom: clamp(28px, 4vw, 48px); }
+  .chain__head h2 { margin: 12px 0 20px; max-width: 22ch; }
+  .nowrap { white-space: nowrap; }
+
+  .map { overflow-x: auto; margin-inline: calc(-1 * var(--gutter, 0px)); padding-inline: var(--gutter, 0px); scrollbar-width: thin; }
+  .map__svg { display: block; width: 100%; min-width: 900px; height: auto; }
+  .edge { fill: none; stroke: var(--text); stroke-opacity: 0.22; stroke-width: 1.5; }
+  .edge--research { stroke: var(--accent); stroke-opacity: 0.55; }
+  .node { cursor: pointer; }
+  .node__bg { fill: var(--surface); }
+  .node__ring { fill: none; stroke: var(--text); stroke-opacity: 0.35; stroke-width: 1.5; transition: stroke 0.3s, stroke-width 0.3s; }
+  .node--build .node__ring, .node--research .node__ring { stroke: var(--accent); stroke-opacity: 1; stroke-width: 2; }
+  .node__halo { fill: var(--accent); fill-opacity: 0.16; }
+  .node__ini { text-anchor: middle; font-family: var(--font-mono); font-size: 12px; fill: var(--muted); }
+  .node__label { text-anchor: middle; font-size: 13px; fill: var(--text); transition: fill 0.3s; }
+  .node image { transition: opacity 0.3s; }
+  .node:hover .node__ring, .node:focus-visible .node__ring { stroke: var(--accent); stroke-opacity: 1; stroke-width: 3.5; }
+  .node:hover .node__label, .node:focus-visible .node__label { fill: var(--accent); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; margin: 16px 0 0; font-size: 10px; }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .lg { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid currentColor; opacity: 0.6; }
+  .lg--build { border-color: var(--accent); opacity: 1; }
+  .lg--research { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 35%, transparent); opacity: 1; }
+  .legend__hint { display: none !important; }
+  @media (max-width: 960px) { .legend__hint { display: inline-flex !important; } }
+
+  .story { margin-top: clamp(32px, 5vw, 56px); border-top: 1px solid var(--line); }
+  .story__sum { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 28px 0; cursor: pointer; list-style: none; }
+  .story__sum::-webkit-details-marker { display: none; }
+  .story__sum .display-s::after { content: ' ↓'; color: var(--accent); }
+  .story[open] .story__sum .display-s::after { content: ' ↑'; }
+  .story__sum:hover .display-s { color: var(--accent); }
+  @media (max-width: 600px) { .story__sum { flex-direction: column; gap: 8px; } }
+
+  .steps { list-style: none; margin: 16px 0 0; padding: 0; position: relative; }
+  .step { display: grid; grid-template-columns: 90px 24px minmax(0, 1fr) 240px; gap: 0 clamp(16px, 2.5vw, 32px); padding-bottom: clamp(32px, 4vw, 56px); position: relative; scroll-margin-top: 120px; }
+  .step::before { content: ''; position: absolute; left: calc(90px + clamp(16px, 2.5vw, 32px) + 11px); top: 14px; bottom: -2px; width: 1px; background: var(--line); }
+  .step:last-child::before { display: none; }
+  .step.is-current .step__title { color: var(--accent); }
+  .step__year { padding-top: 6px; text-align: right; }
+  .step__dot { width: 11px; height: 11px; margin: 7px auto 0; border-radius: 50%; border: 1px solid var(--accent); background: var(--bg); position: relative; z-index: 1; }
+  .step--build .step__dot { background: var(--accent); }
+  .step--tool .step__dot { border-radius: 2px; }
+  .step--research .step__dot { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .step__title { margin: 6px 0 10px; transition: color 0.3s; }
+  .step__link { transition: color 0.3s; }
+  .step__link:hover { color: var(--accent); }
+  .step__from { margin: 0 0 4px; font-size: 10px; text-transform: none; letter-spacing: 0.02em; }
+  .step__text { margin: 12px 0 0; max-width: 60ch; }
+  .step__note { margin: 12px 0 0; }
+  .step__learned { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 0; }
+  .step__media { display: block; align-self: start; }
+  .step__ph { display: grid; place-items: center; aspect-ratio: 4 / 3; border: 1px dashed var(--line); border-radius: var(--radius); padding: 12px; text-align: center; font-size: 10px; }
+  @media (max-width: 900px) {
+    .step { grid-template-columns: 24px minmax(0, 1fr); }
+    .step::before { left: 11px; }
+    .step__year { grid-column: 2; grid-row: 1; text-align: left; padding-top: 0; }
+    .step__dot { grid-column: 1; grid-row: 1; margin-top: 4px; }
+    .step__body { grid-column: 2; }
+    .step__media { grid-column: 2; max-width: 360px; margin-top: 16px; }
+  }
+</style>

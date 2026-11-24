@@ -4,6 +4,9 @@ kind: "Research instrument"
 year: "2023–24"
 order: 2
 featured: true
+facts:
+  - { v: "VIS → NIR", k: "wavelength range" }
+  - { v: "3D-printed", k: "optical housing and mounts" }
 summary: "A low-cost visible-to-near-infrared spectrometer built largely from 3D-printed parts and calibrated for lab scattering studies."
 tags: ["Spectroscopy", "3D printing", "Calibration"]
 specs:

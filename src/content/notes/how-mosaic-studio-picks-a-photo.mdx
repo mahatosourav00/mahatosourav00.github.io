@@ -1,0 +1,68 @@
+---
+title: How Mosaic Studio picks a photo for every tile
+description: Inside the solver of my photo-mosaic app, from colour patches and a greedy first pass to swap refinement, and why I rebuilt it in Rust for the browser.
+date: 2026-11-22
+series: Build log
+cover: ../../assets/images/projects/mosaic-studio/vermeer-fine.jpg
+tags: [Mosaic Studio, Algorithms, Rust, WebAssembly, WebGPU]
+builds: [mosaic-studio]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). Answer any QUESTION and I'll weave it in. */}
+
+A photo mosaic looks like magic: step back and you see a face; step closer and the face is made of hundreds of tiny, unrelated photos. Underneath, it is a matching problem. You have a main picture cut into cells, and a pile of photos. Which photo goes in which cell?
+
+This is how [Mosaic Studio](/projects/mosaic-studio) answers that, and what I learned building it twice.
+
+{/* QUESTION: Who was the first mosaic for? A line about the friend (no name needed) would make a great opening. */}
+
+## Step 1: describe every cell with 48 numbers
+
+The simplest approach is to give each cell its average colour, and each photo its average colour, and match those. It works, but the result looks blocky: a photo that is dark on the left and bright on the right gets the same average as one that is evenly grey.
+
+So the solver looks a little closer. The main picture is resized so that every cell is 24 × 24 pixels, and each cell is then summarised as a **4 × 4 grid of colours**: 16 small patches with 3 numbers each, 48 numbers in all. Every tile photo is reduced the same way. Now a photo with a bright sky at the top really does land where the picture is bright at the top.
+
+The colours are compared in **CIELAB** (Lab), not RGB. Lab is built so that equal distances look roughly equally different to a human eye, which RGB is not. The "distance" between a cell and a photo is simply the sum of squared differences across those 48 numbers.
+
+The solver also tries each photo **mirrored left to right** and keeps whichever version fits better. That doubles the choice for free.
+
+## Step 2: a greedy first pass, with rules
+
+With 1,500 cells and a few hundred photos, the solver first fills every cell greedily: visit a cell, give it the best photo, move on. Three rules keep that honest:
+
+- **Don't overuse a favourite.** Every time a photo is used, it gets a small penalty, scaled to the typical matching error, so a photo that fits everywhere doesn't take over.
+- **Don't put twins side by side.** By default, the same photo can't appear within **6 cells** of itself. If no photo passes every rule, the solver relaxes the distance rule for that one cell and counts it.
+- **Important cells choose first.** When the app finds a subject, such as a face, those cells are visited first, so they get the best photos before the pile runs thin. Without a subject, the order is shuffled.
+
+## Step 3: swap until it stops getting better
+
+A greedy pass is fast but short-sighted: an early cell can take a photo that a later cell needed more. So the solver then tries **swaps**. It picks two cells at random and asks one question: would exchanging their photos lower the total error, without breaking the distance rule? If so, swap.
+
+It tries this up to 30 times per cell, capped at 300,000 attempts. Usage counts never change, because a swap only exchanges photos, so the "don't overuse" balance from step 2 survives.
+
+## Two finishing touches
+
+- **Small tiles where detail lives.** In *extra fine detail* mode, the cells with the most detail (measured by how much the brightness varies inside them, boosted on faces) are split into a 2 × 2 grid of smaller tiles. Eyes and edges get four photos; flat backgrounds keep one.
+- **A gentle tint.** Each photo is nudged in Lab towards its cell's average colour, by default halfway, and more strongly on the subject. Too little, and the picture is hard to see; too much, and the photos lose their own colours. It's a slider, because the right amount is a matter of taste.
+
+Before any of this, the app also cleans the photo pile: it trims borders, skips blurry photos (using the variance of the Laplacian, a standard sharpness measure), drops near-duplicates with a 64-bit image hash, and crops around faces.
+
+## Making it build itself
+
+The animation plays the finished mosaic as a film: every tile starts somewhere off-screen and flies, swirls or rains into its cell while a virtual camera moves. Each tile is a small textured square drawn on the GPU, so thousands of them can move at once and stay smooth.
+
+## Building it twice
+
+The first version was a Windows app in **Python**, using OpenCV for the image work, OpenGL for the animation and FFmpeg for the video. It worked well. But it only ran on a PC, and many of the people I'd want to use it, the ones making a gift for a friend, only have a phone.
+
+So I rebuilt it for the browser:
+
+- The solver and renderer are now **Rust**, compiled to **WebAssembly**, so the heavy maths runs at near-native speed on a phone.
+- Drawing uses **wgpu**, which talks to **WebGPU** where the browser has it and falls back to **WebGL2** where it doesn't.
+- Videos are encoded on the device with the browser's own **WebCodecs** encoder and packed into an MP4, or recorded as WebM where MP4 isn't supported.
+- A **service worker** lets the app install like a normal app and work offline.
+
+I'll be honest about one thing: I'm not a Rust programmer. I designed the app (what each step does, every setting, how the animation should feel) and checked every result, but much of the Rust code was written with the help of an AI coding assistant, Claude, turning my ideas into code. What made that work was the Python version. The Rust solver is a direct port of it, and its tests check it against the original: the Lab conversion must match OpenCV's numbers, and the grid must come out the same shape as in Python. Matching the old app number for number is what let me trust the new one, without being able to read every line of it like an expert.
+
+Nothing is uploaded: the photos are read and the mosaic is built on your own device. Try it at [mahatosourav00.github.io/mosaic-studio-web](https://mahatosourav00.github.io/mosaic-studio-web/).

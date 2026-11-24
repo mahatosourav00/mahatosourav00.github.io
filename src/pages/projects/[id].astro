@@ -3,6 +3,8 @@ import Article from '../../layouts/Article.astro';
 import Media from '../../components/Media.astro';
 import Gallery from '../../components/Gallery.astro';
 import { getCollection, render } from 'astro:content';
+import { getMaking } from '../../lib/making';
+import { getNotes } from '../../lib/notes';
 
 export async function getStaticPaths() {
   const items = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -11,16 +13,34 @@ export async function getStaticPaths() {
 const { entry, next } = Astro.props;
 const { Content } = await render(entry);
 const d = entry.data;
+const notes = await getNotes((n) => n.data.builds.some((b) => b.id === entry.id));
+// Lineage comes from the making chain (src/content/making.json): steps can be builds, tools or hobbies.
+const steps = await getMaking();
+const self = steps.find((st) => st.data.project?.id === entry.id);
+const stepById = new Map(steps.map((st) => [st.id, st]));
+const grewFrom = self ? self.data.from.map((f) => ({ step: stepById.get(f.id)!, via: f.via })) : [];
+const ledTo = self ? steps.flatMap((st) => st.data.from.filter((f) => f.id === self.id).map((f) => ({ step: st, via: f.via }))) : [];
+// A tall side column can't stay pinned without hiding its bottom, so only pin the spec sheet when it is alone.
+const pinned = grewFrom.length + ledTo.length + notes.length === 0;
+const fmt = (date: Date) => date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 ---
 <Article
   title={d.title}
   description={d.summary}
   eyebrow={`Build · ${d.kind}`}
   back={{ href: '/projects', label: 'All builds' }}
-  meta={[{ k: 'Year', v: d.year }, { k: 'Type', v: d.kind }, { k: 'Stack', v: d.tags.join(', ') }]}
+  meta={[{ k: 'Year', v: d.year }, { k: 'Type', v: d.kind }, ...(d.status === 'in-progress' ? [{ k: 'Status', v: 'In progress' }] : []), { k: 'Stack', v: d.tags.join(', ') }]}
   next={{ href: `/projects/${next.id}`, title: next.data.title }}
 >
   <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.title} ratio="21 / 9" eager sizes="100vw" /></div>
+
+  {d.links.length > 0 && (
+    <p class="actions not-prose">
+      {d.links.map((l, i) => (
+        <a href={l.href} class:list={['act', { 'act--primary': i === 0 }]} target="_blank" rel="noopener">{l.label} ↗</a>
+      ))}
+    </p>
+  )}
 
   <Content />
 
@@ -30,20 +50,67 @@ const d = entry.data;
 
   <Gallery slot="after" items={d.gallery} />
 
-  <div slot="aside" class="specs">
-    <p class="mono muted">Spec sheet</p>
-    <dl>
-      {d.specs.map((s) => (
-        <div class="spec"><dt class="mono muted">{s.k}</dt><dd>{s.v}</dd></div>
-      ))}
-    </dl>
+  <div slot="aside" class:list={['side', { 'side--pinned': pinned }]}>
+    <div class="card">
+      <p class="mono muted">Spec sheet</p>
+      <dl>
+        {d.specs.map((s) => (
+          <div class="spec"><dt class="mono muted">{s.k}</dt><dd>{s.v}</dd></div>
+        ))}
+      </dl>
+    </div>
+    {(grewFrom.length > 0 || ledTo.length > 0) && (
+      <div class="card">
+        <p class="mono muted">Lineage · <a href={`/hobbies#step-${self!.id}`} class="link">see the whole chain</a></p>
+        {[{ label: 'Grew out of', items: grewFrom }, { label: 'Led to', items: ledTo }].filter((g) => g.items.length > 0).map((g) => (
+          <div class="lin">
+            <p class="mono muted lin__h">{g.label}</p>
+            <ul class="bnotes">
+              {g.items.map((l) => (
+                <li>
+                  <a href={l.step.href ?? `/hobbies#step-${l.step.id}`} class="bnote">
+                    <span class="bnote__t">{l.step.data.short} →</span><span class="muted lin__via">{l.via}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
+    {notes.length > 0 && (
+      <div class="card">
+        <p class="mono muted">Notes on this build</p>
+        <ul class="bnotes">
+          {notes.map((n) => (
+            <li><a href={`/notes/${n.id}`} class="bnote"><span class="mono muted">{fmt(n.data.date)}</span><span class="bnote__t">{n.data.title} →</span></a></li>
+          ))}
+        </ul>
+      </div>
+    )}
   </div>
 </Article>
 
 <style>
   .report { margin-top: 32px; }
-  .specs { position: sticky; top: 120px; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--surface); }
-  .specs dl { margin: 16px 0 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 40px; }
+  .act { display: inline-flex; align-items: center; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line-strong); font-size: 14px; transition: border-color 0.3s, color 0.3s, background 0.3s; }
+  .act:hover { border-color: var(--accent); color: var(--accent); }
+  .act--primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 500; }
+  .act--primary:hover { background: transparent; }
+  .side--pinned { position: sticky; top: 120px; }
+  .side { display: flex; flex-direction: column; gap: 20px; }
+  .card { border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--surface); }
+  .card dl { margin: 16px 0 0; }
+  .bnotes { list-style: none; margin: 16px 0 0; padding: 0; }
+  .bnote { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .bnote .mono { font-size: 10px; }
+  .bnote__t { font-size: 15px; transition: color 0.3s; }
+  .bnote:hover .bnote__t { color: var(--accent); }
+  .lin { margin-top: 16px; }
+  .lin__h { font-size: 10px; }
+  .lin .bnotes { margin-top: 8px; }
+  .lin__via { font-size: 13px; }
   .spec { padding: 12px 0; border-top: 1px solid var(--line); }
   .spec dt { font-size: 10px; }
   .spec dd { margin: 4px 0 0; font-size: 15px; }

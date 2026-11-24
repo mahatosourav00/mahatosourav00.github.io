@@ -1,0 +1,89 @@
+---
+title: From a ₹5,000 scholarship to Chandrayaan-2
+description: How a rover model, a drone I saved up for one part at a time, a 3D printer and a camera turned into the instruments I now build for my research.
+date: 2026-11-24
+series: Story
+pinned: true
+cover: ../../assets/images/projects/fpv-drone/build-2020-flightready.jpg
+tags: [Robotics, FPV, 3D printing, Astrophotography]
+builds: [lunar-rover, fpv-drone, quadcopter, iot-lighting, astro-tracker, spectrometer, goniometer, mosaic-studio, ledfx-mobile]
+draft: true
+---
+
+{/* Hidden notes for Sourav (not shown on the site). Answer any of the QUESTION lines and I'll weave them in. */}
+
+People sometimes ask how a physics student ended up building drones, telescope mounts and lab instruments. The honest answer is that nothing here was planned. Each thing I built taught me just enough, and gave me just enough confidence, to try the next one.
+
+## A rover that didn't really work
+
+My first real build wasn't mine. At NISER, I joined a team building a model of Chandrayaan-2's lunar rover for an outreach event on the mission, organised by NISER's School of Earth and Planetary Sciences. It was a student-level build: it looked like the real thing, and its functions were very simple. I was a complete beginner, learning by doing alongside the team.
+
+That was enough. I came out of it knowing the fundamentals, and with something more useful: the feeling that I could build something on my own.
+
+{/* QUESTION: Any small moment from the rover build you remember? A mistake, a first success, something a senior taught you? */}
+
+## A childhood dream, one part at a time
+
+Since I was a child, I had wanted to fly an FPV drone: the kind you fly with goggles on, seeing what the drone sees. In 2019 I decided to build one.
+
+There was one problem. My only income was a **₹5,000-a-month scholarship**. A drone was far out of reach in one go, so I planned the whole build first: every part, what it had to work with, and what it would cost. Then I saved. I would wait months, buy one part, and start saving for the next. The first drone cost about **₹50,000** in all, and collecting every part took around **a year and a half**.
+
+In **2020**, the last part arrived, and I took it out for its first flight: no goggles yet, just watching it with my own eyes, in the self-levelling mode beginners use. I had strapped the LiPo battery on with zip ties. In the air it worked loose, slipped into a spinning propeller, and the drone came down. The battery was ruined.
+
+It was the most useful crash I've had. A year and a half of waiting, and the first lesson was that a battery strap is not a detail.
+
+I didn't stop there. Over the years I learned the FPV world from the inside: the flight firmware (Betaflight and INAV), the radio's firmware (OpenTX, flashed with custom builds), the ExpressLRS radio link, and the protocols that talk to the motors. The drone changed with every upgrade: analog video to digital, a basic camera to a GoPro (in August 2023), and then a GoPro stripped out of its case to save weight. I modded my radio to run on Li-ion cells and to take an external transmitter module. Counting every part, crash and upgrade since that first build, my FPV setup has cost around **₹1.8 lakh**, spread over years of saving.
+
+## Flying it somewhere new
+
+Once it flew well, it started travelling with me. Filming led to editing, and editing led to a whole new set of things to learn: how video files work, codecs, colour and colour grading, and tools like Gyroflow and ReelSteady that smooth out shaky footage. The best clips are in my [FPV cinematics album](/hobbies/fpv-cinematics).
+
+## Leading a bigger build
+
+The FPV drone gave me the confidence to lead something bigger. At the NISER Robotech Club, we built an [autonomous quadcopter](/projects/quadcopter) on club funding, buying the expensive parts we couldn't make. The idea was a drone that can fly itself, and a platform that other projects, like AI vision, could later plug into.
+
+## The magic pencil
+
+After several builds, I kept running into the same wall: the part I needed didn't exist, or didn't fit. So, in January 2023, I bought a 3D printer.
+
+As a child I used to watch *Shaka Laka Boom Boom*, a TV show about a boy with a magic pencil: whatever he drew became real. That is what a 3D printer felt like.
+
+I learned CAD and slicing. I learned to repair the printer myself, and in the end I took the whole machine apart to understand every piece of it. Then I started modifying it, and moved it to **Klipper**, a firmware that runs on a separate computer.
+
+That computer was a tiny Raspberry Pi Zero 2 W, and it opened another door. I bought a bigger Pi, a Pi 4B, and turned it into a home server. I learned Docker, wrote my own Compose files and learned how home networks really work. Today it shares a backup drive across the house, syncs the photos from my phone, streams my films and my lossless music, and even turned our USB-only printer into a wireless one.
+
+With a printer, the [smart lamps](/projects/iot-lighting) became possible too: printed trays, towers and diffusers around addressable LEDs, reacting to music and to whatever is on the TV.
+
+## A new way of seeing
+
+Then, in October 2024, I bought a camera: a Canon R10 with a couple of lenses. Learning ISO, shutter speed and aperture was the easy part. What surprised me was what happened to the way I looked at things. Searching for frames, I started to notice the small, precious details in the most ordinary places, and to appreciate how beautiful and varied the world around me is.
+
+{/* QUESTION: Is there one photo that captures this feeling? I could put it here. */}
+
+## The night it all came together
+
+I study space science, so of course I pointed the camera at the sky. I had a tripod and no idea what I was doing.
+
+The first time I saw the **Orion Nebula** on the camera's screen, it was badly trailed, smeared by Earth's rotation. And it still looked like a painting. I realised there is a whole world up there: nature's own canvas.
+
+So I went deep again. Tracking, equatorial mounts, right ascension and declination, the sidereal rate, polar alignment, GoTo, plate solving, guiding, calibration frames, light pollution. And then processing: stacking in DeepSkyStacker and Siril, controlling the camera with Astrophotography Tool and N.I.N.A., and finishing in Lightroom.
+
+The more I learned, the clearer it got: I needed a tracking mount, and good ones are very expensive. But by now I had some savings, a 3D printer and the skills from every build before. So I [built my own](/projects/astro-tracker). That's the point where my two paths, the drones and the camera, finally met.
+
+## Where it led
+
+None of this was meant to be a career plan. But it added up. This experience got me a position at IIT Bhubaneswar, building hardware for an [autonomous underwater rover](/research/underwater-rover). It started with a rover model; this one goes to work, 100 metres under water.
+
+At NISER, it helped me win funding to build instruments of my own: a [3D-printed spectrometer](/projects/spectrometer) and a [motorized goniometer](/projects/goniometer), which now feeds the photometric correction of Chandrayaan-2's IIRS data, the research I do today.
+
+## The rule that stuck
+
+Somewhere along the way, one rule stuck: **if the tool I want doesn't exist, isn't free, or only runs on a PC, I build it, and I make it for everyone.** That's why the tracker exists. It's why I wrote [LedFx Mobile](/projects/ledfx-mobile), so music-reactive lights don't need a PC, and [Mosaic Studio](/projects/mosaic-studio), so anyone can make a mosaic film for a friend, for free.
+
+## Why from scratch
+
+There's one more reason I build things myself, and it matters more than the money.
+
+When I build something from scratch, I know every wire and every line of it. If it breaks, I can fix it. If I want it to do more, I can upgrade it. And because I can fix it, I'm never afraid to try something new with it. A bought gadget is something I have to be careful with. Something I built is something I can learn from, even when the experiment fails.
+
+It started with ₹5,000 a month and a lot of waiting. What I got out of it wasn't a drone. It was the confidence that if something breaks, I can fix it, and if something doesn't exist, I can make it.

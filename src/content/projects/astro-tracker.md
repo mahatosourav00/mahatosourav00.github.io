@@ -24,13 +24,15 @@ gallery:
 
 ## Why
 
-Long-exposure astrophotography needs a mount that cancels Earth's rotation precisely. Good ones are expensive, so I built my own, based on the open-source [OpenAstroTracker](https://openastrotech.com) design.
+Long-exposure astrophotography needs a mount that cancels Earth's rotation precisely. Good ones are expensive. I had some savings, a 3D printer and the skills from earlier builds, so I built my own, based on the open-source [OpenAstroTracker](https://openastrotech.com) design.
 
 ## Features
 
 - **3D-printed equatorial mount** driven from a PC, with GoTo slewing to targets. The two curved arcs and gears are printed, and a small LCD hand controller shows the mount's coordinates in the field.
 - **Auto polar calibration** to align the mount with the celestial pole.
 - A **secondary guide-scope camera** that measures tracking drift and corrects it in real time during long exposures.
+
+Why a one-axis tracker stops being enough at 250 mm is worked out in the note [Fighting Earth's rotation](/notes/fighting-earths-rotation).
 
 ## Two trackers, two jobs
 

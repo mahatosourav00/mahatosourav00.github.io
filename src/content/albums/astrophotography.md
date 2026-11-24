@@ -3,7 +3,7 @@ title: "Astrophotography"
 kicker: "Night sky"
 order: 1
 intro: "Deep-sky objects, the Moon and the Milky Way, shot on a Canon R10 with a 55–250 mm lens, riding on trackers I built myself. Every frame is a lesson in patience, polar alignment and calibration frames."
-gear: ["Canon EOS R10", "Canon 55–250 mm lens", "Self-built GoTo astro-tracker (based on OpenAstroTracker)", "Self-built RA-axis star tracker (based on OG Star Tracker)"]
+gear: ["Canon EOS R10", "Canon 55–250 mm lens", "Self-built GoTo astro-tracker (based on OpenAstroTracker)", "Self-built RA-axis star tracker (based on OG Star Tracker)", "N.I.N.A., Siril, DeepSkyStacker, Lightroom"]
 items:
   - src: ../../assets/images/astrophotography/andromeda-m31.jpg
     title: "Andromeda Galaxy (M31)"

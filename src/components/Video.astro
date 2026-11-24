@@ -8,7 +8,8 @@ interface Props {
   ratio?: string;
   // 'view'  : plays while on screen, with controls (big hobby-album clips)
   // 'hover' : poster until hovered / tapped, no controls (small gallery tiles)
-  mode?: 'view' | 'hover';
+  // 'ambient': plays while on screen, no controls, like a moving photo (showreel tiles)
+  mode?: 'view' | 'hover' | 'ambient';
 }
 const { src, poster, alt, ratio, mode = 'view' } = Astro.props;
 const r = ratio ?? (poster ? `${poster.width} / ${poster.height}` : '16 / 9');
@@ -21,7 +22,7 @@ const hover = mode === 'hover';
     muted
     loop
     playsinline
-    controls={!hover}
+    controls={mode === 'view'}
     preload={hover ? 'metadata' : 'none'}
     aria-label={alt}
     data-autoplay={hover ? undefined : ''}

@@ -15,4 +15,6 @@ export default defineConfig({
     shikiConfig: { theme: 'github-dark-dimmed' },
   },
   prefetch: { prefetchAll: true },
+  // The interactive toys page used to be /lab; old links keep working.
+  redirects: { '/lab': '/play' },
 });
