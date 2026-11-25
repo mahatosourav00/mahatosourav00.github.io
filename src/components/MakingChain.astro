@@ -40,7 +40,8 @@ const edges = steps.flatMap((s) =>
   <div class="chain__head" data-reveal>
     <p class="eyebrow">How it all connects</p>
     <h2 class="display-l" id="chain-title">From a ₹5,000 scholarship <span class="italic accent">to <span class="nowrap">Chandrayaan-2.</span></span></h2>
-    <p class="muted chain__lead">Building things is my first and biggest hobby. Each build pulled in a new skill, tool or hobby. Two paths, one from drones and one from a camera, meet at the astro-tracker, and then run into my research. Along the way, one rule stuck: if the tool I want doesn't exist, isn't free or only runs on a PC, I build it, for everyone. Tap any step.</p>
+    <p class="muted chain__lead">Each build pulled in a new skill, tool or hobby. Two paths, one from drones and one from a camera, meet at the astro-tracker, and then run into my research. Tap any step.</p>
+    <p class="chain__rule">One rule stuck along the way: if the tool I want doesn't exist, isn't free or only runs on a PC, <span class="italic accent">I build it, for everyone.</span></p>
   </div>
 
   <div class="map" data-reveal>
@@ -132,6 +133,7 @@ const edges = steps.flatMap((s) =>
   .chain__head { max-width: 64ch; margin-bottom: clamp(28px, 4vw, 48px); }
   .chain__head h2 { margin: 12px 0 20px; max-width: 22ch; }
   .nowrap { white-space: nowrap; }
+  .chain__rule { margin: 20px 0 0; padding-left: 16px; border-left: 2px solid var(--accent); font-family: var(--font-display); font-size: clamp(18px, 1.6vw, 22px); line-height: 1.35; }
 
   .map { overflow-x: auto; margin-inline: calc(-1 * var(--gutter, 0px)); padding-inline: var(--gutter, 0px); scrollbar-width: thin; }
   .map__svg { display: block; width: 100%; min-width: 900px; height: auto; }

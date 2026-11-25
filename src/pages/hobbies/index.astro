@@ -15,10 +15,12 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
 <Base title="Hobbies" description="FPV drones, astrophotography, 3D printing and photography by Sourav Mahato, and how building things led to all of them.">
   <PageHeader
     eyebrow="Hobbies"
-    title="What I do"
-    italic="after hours."
-    lead="Drones, the night sky, 3D printing and photography. Tap anything to dive in."
-  />
+    title="It all started"
+    italic="with building things."
+    lead="Building is my first hobby, and each build pulled in a new one: the night sky, photography, 3D printing and drones. Tap anything to dive in."
+  >
+    <a href="#making" class="mono accent link ph-jump" data-reveal data-immediate data-delay="0.4">See how it all connects ↓</a>
+  </PageHeader>
 
   <section class="wrap reel" aria-label="Highlights">
     {showreel.map((t, i) => (
@@ -79,6 +81,14 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
     <ul class="also" data-reveal>
       <li>Radio & RF</li><li>Electronics repair</li><li>Science outreach</li>
     </ul>
+    <nav class="next" aria-label="Keep exploring" data-reveal>
+      <p class="eyebrow">Keep going</p>
+      <div class="next__links">
+        <a href="/projects" class="btn">All the builds →</a>
+        <a href="/research" class="btn">Where they led: research →</a>
+        <a href="/notes" class="btn">Notes from the workbench →</a>
+      </div>
+    </nav>
   </section>
 </Base>
 
@@ -112,6 +122,9 @@ const frameCount = (a: (typeof allAlbums)[number]) => a.data.items.length + allA
   .door:hover .door__title { color: var(--accent); transform: translateX(12px); }
   .door__intro { max-width: 40ch; }
   .also { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px 32px; font-family: var(--font-display); font-size: clamp(28px, 3.4vw, 48px); }
+  .ph-jump { margin-top: 24px; }
+  .next { margin-top: clamp(64px, 8vw, 110px); padding-top: clamp(32px, 4vw, 48px); border-top: 1px solid var(--line); }
+  .next__links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
   .also li:not(:last-child)::after { content: '·'; margin-left: 32px; color: var(--accent); }
   @media (max-width: 800px) { .door, .door--group { grid-template-columns: 1fr; } .door__i { display: none; } .subs { grid-column: 1; grid-template-columns: 1fr; } }
 </style>
