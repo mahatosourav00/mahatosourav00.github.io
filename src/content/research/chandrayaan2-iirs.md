@@ -18,7 +18,7 @@ Raw spectra from an orbiting spectrometer carry far more than the surface's comp
 ## What I do
 
 - **Pipeline.** I develop the end-to-end pipeline for Chandrayaan-2 IIRS data: artifact correction, thermal-emission removal and photometric normalization. Methods are prototyped and validated on Dawn VIR data, which I know well from my Ceres work.
-- **Goniometer.** I design and build a motorized, computer-controlled goniometer that measures how light scatters off sample surfaces across incidence, emission and azimuth (phase) angles. The goal is to anchor the photometric correction in real lab data rather than in model assumptions alone.
+- **Goniometer.** I design and build a motorized goniometer that will measure how light scatters off sample surfaces across incidence, emission and azimuth (phase) angles. The first axis already runs, controlled over Wi-Fi with a spectral sensor on the arm; the other two are next. The goal is to anchor the photometric correction in real lab data rather than in model assumptions alone.
 
 ## Why it matters
 

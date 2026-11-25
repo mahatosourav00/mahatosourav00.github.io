@@ -268,8 +268,9 @@
     "short": "Goniometer",
     "map": [8, 1],
     "project": "goniometer",
-    "text": "Now the builds feed my research directly: a computer-controlled rig that measures how light scatters off a surface at any angle, for Chandrayaan-2 IIRS photometric correction.",
-    "learned": ["Photometry", "Python control", "Multi-axis motion"],
+    "text": "Now the builds feed my research directly: a motorized arm, driven from a phone over its own Wi-Fi, that will carry a spectral sensor around a sample to measure how light scatters at any angle, for Chandrayaan-2 IIRS photometric correction. The first axis works; two more are planned.",
+    "note": "four-things-that-broke-my-goniometer",
+    "learned": ["Photometry", "ESP32 firmware", "Mechanical debugging"],
     "from": [
       {
         "id": "astro-tracker",
