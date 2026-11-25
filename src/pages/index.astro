@@ -136,6 +136,27 @@ const stats = [
     </div>
   </section>
 
+  <section class="section pubs">
+    <div class="wrap pubs__grid">
+      <div>
+        <p class="eyebrow" data-reveal>Papers & talks</p>
+        <h2 class="display-m" data-split>Sharing the <span class="italic">work.</span></h2>
+      </div>
+      <ul class="plist">
+        {pubs.map((p) => (
+          <li class="pitem" data-reveal>
+            <span class="mono accent">{p.data.year}</span>
+            <div>
+              <p class="pitem__t">{p.data.title}</p>
+              <p class="mono muted">{p.data.venue}</p>
+            </div>
+            <span class="tag">{p.data.type}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
   <!-- ───── BUILDS (horizontal) ───── -->
   <section class="builds" data-hscroll>
     <div class="builds__track" data-hscroll-track>
@@ -199,26 +220,6 @@ const stats = [
     </section>
   )}
 
-  <section class="section pubs">
-    <div class="wrap pubs__grid">
-      <div>
-        <p class="eyebrow" data-reveal>Papers & talks</p>
-        <h2 class="display-m" data-split>Sharing the <span class="italic">work.</span></h2>
-      </div>
-      <ul class="plist">
-        {pubs.map((p) => (
-          <li class="pitem" data-reveal>
-            <span class="mono accent">{p.data.year}</span>
-            <div>
-              <p class="pitem__t">{p.data.title}</p>
-              <p class="mono muted">{p.data.venue}</p>
-            </div>
-            <span class="tag">{p.data.type}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
 </Base>
 
 <script>
