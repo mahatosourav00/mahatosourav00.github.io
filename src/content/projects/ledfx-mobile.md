@@ -23,7 +23,7 @@ links:
 
 ## Why I made it
 
-My [smart lamps](/projects/iot-lighting) react to music through **LedFx**, the best open-source tool for it. But LedFx runs only on a PC. Not everyone has one, and nobody carries a PC around just to make the lights dance. I couldn't find an open-source app that did the same from a phone, so I built one.
+My [smart lamps](/projects/iot-lighting) react to music through **LedFx**, the best open-source tool for it. But LedFx runs only on a PC. Not everyone has one, and nobody carries a PC around just to make the lights dance. I couldn't find an open-source app that did the same from a phone. I had wanted one since my smart-lamp days around 2022, and in 2026 I finally built it.
 
 ## What it does
 

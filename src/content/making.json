@@ -8,8 +8,21 @@
     "short": "Lunar rover",
     "map": [0, 1],
     "project": "lunar-rover",
-    "text": "A team build for an outreach event on the Chandrayaan-2 mission, organised by NISER's School of Earth and Planetary Sciences: a simple, look-alike model of its rover. It taught me the fundamentals, and gave me the confidence to try something on my own.",
-    "learned": ["Arduino", "Motor drivers", "Sensors", "Teamwork"],
+    "text": "A team build for an outreach event on the Chandrayaan-2 mission, organised by NISER's School of Earth and Planetary Sciences: a simple, look-alike model of its rover. It taught me wireless control, sensors and teamwork. Together with the maze robot, it gave me the experience to try something on my own.",
+    "learned": ["Wireless control", "Sensors", "Teamwork"],
+    "from": []
+  },
+  {
+    "id": "maze-bot",
+    "order": 1.5,
+    "year": "2019",
+    "kind": "build",
+    "title": "A maze-solving robot, led as a beginner",
+    "short": "Maze-solving robot",
+    "map": [0, 2],
+    "project": "maze-solving-robot",
+    "text": "A separate club project, running at about the same time as the rover: a line-follower with an 8-channel IR array, built to find its way through a maze. I led its first stage of development. With the rover, it gave me the experience to start building on my own.",
+    "learned": ["Arduino", "Motor drivers", "IR sensing"],
     "from": []
   },
   {
@@ -27,7 +40,11 @@
     "from": [
       {
         "id": "lunar-rover",
-        "via": "the basics, and the confidence to build alone"
+        "via": "wireless control, sensors and teamwork"
+      },
+      {
+        "id": "maze-bot",
+        "via": "motor drivers, IR sensing and leading a build"
       }
     ]
   },
@@ -126,14 +143,14 @@
   },
   {
     "id": "ledfx-mobile",
-    "order": 7.5,
+    "order": 14,
     "year": "2026",
     "kind": "build",
     "title": "A phone app, because not everyone has a PC",
     "short": "LedFx Mobile",
-    "map": [6, 3],
+    "map": [8, 3],
     "project": "ledfx-mobile",
-    "text": "Music-reactive lamps meant LedFx, and LedFx meant a PC running. I couldn't find an open-source phone version, so I wrote one: a native Android app with all of LedFx's effects, streaming to the lamps over Wi-Fi.",
+    "text": "Music-reactive lamps meant LedFx, and LedFx meant a PC running. I had wanted a phone version since my smart-lamp days around 2022 and couldn't find an open-source one, so in 2026 I finally wrote it: a native Android app with all of LedFx's effects, streaming to the lamps over Wi-Fi.",
     "learned": ["Kotlin", "Android", "Audio DSP", "DDP streaming"],
     "from": [
       {
@@ -175,14 +192,14 @@
   },
   {
     "id": "mosaic-studio",
-    "order": 9.5,
+    "order": 15,
     "year": "2026",
     "kind": "build",
     "title": "Mosaic Studio, a gift that became an app",
     "short": "Mosaic Studio",
     "map": [4, 3],
     "project": "mosaic-studio",
-    "text": "A mosaic of a friend made from their own photos is a deeply personal gift, but animated ones cost a lot and come in a few fixed styles. So I built my own, first for Windows, then as a free web app that runs anywhere.",
+    "text": "A mosaic of a friend made from their own photos is a deeply personal gift, but animated ones cost a lot and come in a few fixed styles. I had carried the idea since my smart-lamp days around 2022; in 2026 I built my own, first for Windows, then as a free web app that runs anywhere.",
     "learned": ["Rust", "WebAssembly", "WebGPU", "OpenGL", "PWA"],
     "from": [
       {
@@ -243,7 +260,7 @@
     "kind": "research",
     "title": "A real rover, underwater",
     "short": "Underwater rover",
-    "map": [9, 0],
+    "map": [8, 0],
     "research": "underwater-rover",
     "text": "The same experience got me a position at IIT Bhubaneswar, building hardware for an autonomous rover that inspects oil pipelines up to 100 m deep. It started with a rover model; this one goes to work.",
     "learned": ["Pressure housings", "Sensor integration", "On-board automation"],

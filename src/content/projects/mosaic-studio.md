@@ -38,7 +38,7 @@ gallery:
 
 ## Why I made it
 
-A mosaic of a friend, made from hundreds of photos of them, is one of the most personal gifts I can think of. For still mosaics there are one or two good free Windows programs ([AndreaMosaic](https://www.andreaplanet.com/andreamosaic/) is really good). But a **video** of the mosaic assembling itself was a different story: the websites that make one charge a hefty price and offer only a few fixed animations. So I built my own, with as many settings as I wanted.
+A mosaic of a friend, made from hundreds of photos of them, is one of the most personal gifts I can think of. For still mosaics there are one or two good free Windows programs ([AndreaMosaic](https://www.andreaplanet.com/andreamosaic/) is really good). But a **video** of the mosaic assembling itself was a different story: the websites that make one charge a hefty price and offer only a few fixed animations. I had carried the idea since my smart-lamp days around 2022. In 2026 I finally built my own, with as many settings as I wanted.
 
 ## From Windows to everywhere
 
