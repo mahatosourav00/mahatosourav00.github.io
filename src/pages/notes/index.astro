@@ -11,7 +11,7 @@ const series = SERIES.filter((s) => notes.some((n) => n.data.series === s));
 const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 const minutes = (body = '') => Math.max(1, Math.round(body.split(/\s+/).length / 220));
 ---
-<Base title="Notes" description="Stories, build logs, science explainers and how-tos by Sourav Mahato.">
+<Base title="Notes" description="Stories, build logs, planetary-science explainers and how-tos by Sourav Mahato: from drones and spectrometers to processing Chandrayaan-2 data.">
   <PageHeader eyebrow="Notes" title="Field notes" italic="& build logs." lead="The stories behind the builds, the science behind the research, and the how-tos I wish I'd had." />
   <section class="wrap">
     {pinned.map((n) => (
@@ -40,12 +40,12 @@ const minutes = (body = '') => Math.max(1, Math.round(body.split(/\s+/).length /
     )}
     <ul class="nlist">
       {notes.map((n) => (
-        <li data-reveal data-series={n.data.series}>
+        <li data-series={n.data.series}>
           <a href={`/notes/${n.id}`} class="nrow" data-cursor="Read">
             <div class="nrow__media">
               {n.data.cover
-                ? <Media src={n.data.cover} alt="" label={n.data.title} ratio="4 / 3" sizes="220px" reveal={false} />
-                : <span class="nrow__ph mono accent" aria-hidden="true">{n.data.series}</span>}
+                ? <Media src={n.data.cover} alt="" label={n.data.title} ratio="4 / 3" sizes="220px" />
+                : <span class="nrow__ph mono accent" aria-hidden="true" data-reveal-img>{n.data.series}</span>}
             </div>
             <div>
               <p class="mono nrow__eyebrow">

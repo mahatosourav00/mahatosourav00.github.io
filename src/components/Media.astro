@@ -11,8 +11,10 @@ interface Props {
   reveal?: boolean;
   class?: string;
   eager?: boolean;
+  /** CSS object-position for the crop, e.g. 'center 30%' */
+  position?: string;
 }
-const { src, alt, label, ratio = '4 / 3', sizes = '(max-width: 800px) 100vw, 50vw', reveal = true, class: cls, eager = false } = Astro.props;
+const { src, alt, label, ratio = '4 / 3', sizes = '(max-width: 800px) 100vw, 50vw', reveal = true, class: cls, eager = false, position } = Astro.props;
 // Deterministic glow position per label so placeholders don't all look identical
 const seed = [...(label ?? alt)].reduce((a, c) => a + c.charCodeAt(0), 0);
 const px = 20 + (seed * 37) % 60;
@@ -20,7 +22,7 @@ const py = 20 + (seed * 53) % 60;
 ---
 <div class:list={['media', cls]} style={`aspect-ratio:${ratio}`} data-reveal-img={reveal ? '' : undefined}>
   {src ? (
-    <Image src={src} alt={alt} sizes={sizes} widths={[480, 800, 1200, 1800]} loading={eager ? 'eager' : 'lazy'} class="media__img" />
+    <Image src={src} alt={alt} sizes={sizes} widths={[480, 800, 1200, 1800]} loading={eager ? 'eager' : 'lazy'} class="media__img" style={position ? `object-position:${position}` : undefined} />
   ) : (
     <div class="ph media__img" style={`--px:${px}%;--py:${py}%`} role="img" aria-label={alt}>
       <span class="ph__label">{label ?? alt} · photo coming soon</span>

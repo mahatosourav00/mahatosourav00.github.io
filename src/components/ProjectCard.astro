@@ -8,19 +8,19 @@ interface Props {
 }
 const { project, index } = Astro.props;
 const d = project.data;
-// Follow the cover's own shape (between 4:5 and 4:3) so landscape photos aren't chopped into tall slivers.
-const r = d.cover ? Math.min(1.333, Math.max(0.8, d.cover.width / d.cover.height)).toFixed(3) : '0.8';
+// Every card uses the same 4:5 frame so grids and the home strip line up; `coverFocus` picks which part of a wide photo stays in view.
+const r = '4 / 5';
 // No photo yet: a typographic tile with the build's headline facts instead of an empty placeholder.
 const facts = d.facts.length > 0 ? d.facts : d.specs.slice(0, 2).map((s) => ({ v: s.v, k: s.k }));
 const action = d.links[0]?.label.split(' ')[0]; // "Download", "Try", ...
 const inProgress = d.status === 'in-progress';
 ---
-<a href={`/projects/${project.id}`} class="pcard" data-cursor="View" data-reveal>
+<a href={`/projects/${project.id}`} class="pcard" data-cursor="View">
   <div class="pcard__media">
     {d.cover ? (
-      <Media src={d.cover} alt={d.title} label={d.title} ratio={r} reveal={false} sizes="(max-width: 800px) 85vw, 420px" />
+      <Media src={d.cover} alt={d.title} label={d.title} ratio={r} position={d.coverFocus} sizes="(max-width: 800px) 85vw, 420px" />
     ) : (
-      <div class="ptype" style={`aspect-ratio:${r}`} role="img" aria-label={`${d.title}: ${facts.map((f) => `${f.v} ${f.k}`).join(', ')}`}>
+      <div class="ptype" style={`aspect-ratio:${r}`} data-reveal-img role="img" aria-label={`${d.title}: ${facts.map((f) => `${f.v} ${f.k}`).join(', ')}`}>
         <span class="mono accent ptype__kind">{d.kind}</span>
         <dl class="ptype__facts">
           {facts.map((f) => (

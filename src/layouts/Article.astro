@@ -1,5 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import Base from './Base.astro';
+import { site } from '../lib/site';
 
 interface Props {
   title: string;
@@ -8,10 +11,33 @@ interface Props {
   back: { href: string; label: string };
   meta?: { k: string; v: string }[];
   next?: { href: string; title: string };
+  /** Cover photo, also cropped into this page's share card */
+  cover?: ImageMetadata;
+  /** Set for notes: marks the page as an article for search engines */
+  published?: Date;
+  tags?: string[];
 }
-const { title, description, eyebrow, back, meta = [], next } = Astro.props;
+const { title, description, eyebrow, back, meta = [], next, cover, published, tags = [] } = Astro.props;
+// A 1200×630 crop of the cover for link previews; pages without a cover fall back to the site card.
+const card = cover ? await getImage({ src: cover, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 }) : undefined;
+const url = new URL(Astro.url.pathname, Astro.site).href;
+const person = { '@type': 'Person', name: site.name, url: Astro.site?.href };
+const jsonLd = published
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      datePublished: published.toISOString(),
+      author: person,
+      url,
+      mainEntityOfPage: url,
+      keywords: tags.join(', ') || undefined,
+      image: card ? new URL(card.src, Astro.site).href : new URL(site.ogImage, Astro.site).href,
+    }
+  : undefined;
 ---
-<Base title={title} description={description}>
+<Base title={title} description={description} image={card?.src} imageAlt={cover ? title : undefined} type={published ? 'article' : 'website'} published={published} jsonLd={jsonLd}>
   <article class="art">
     <header class="wrap art__head">
       <a href={back.href} class="mono muted link art__back" data-reveal data-immediate>← {back.label}</a>

@@ -23,6 +23,9 @@ const date = d.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long',
   eyebrow={`Note · ${d.series}${d.draft ? ' · Draft, not published' : ''}`}
   back={{ href: '/notes', label: 'All notes' }}
   meta={[{ k: 'Published', v: date }, { k: 'Reading time', v: `${minutes} min` }, { k: 'Tags', v: d.tags.join(', ') }]}
+  cover={d.cover}
+  published={d.date}
+  tags={d.tags}
 >
   {d.cover && <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.title} ratio="21 / 9" eager sizes="100vw" /></div>}
 

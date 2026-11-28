@@ -66,11 +66,11 @@ const items = await Promise.all(
         </>
       );
       return it.full && !it.video ? (
-        <figure class="tile" data-reveal>
+        <figure class="tile">
           <a href={it.full.src} data-pswp-width={it.full.attributes.width} data-pswp-height={it.full.attributes.height} data-caption={it.caption ?? it.title} data-cursor="Zoom" target="_blank">{inner}</a>
         </figure>
       ) : (
-        <figure class="tile" data-reveal data-hover>{inner}</figure>
+        <figure class="tile" data-hover>{inner}</figure>
       );
     })}
   </section>

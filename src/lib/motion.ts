@@ -145,9 +145,12 @@ function initReveals() {
       });
     });
 
-    // Image clip reveal
+    // Image clip reveal: every photo tile wipes in from the bottom up as it scrolls into view.
+    // Tiles inside the pinned horizontal strip are handled below, timed to when they slide in from the side.
+    const pinnedStrip = window.matchMedia('(min-width: 700px)').matches;
     gsap.utils.toArray<HTMLElement>('[data-reveal-img]').forEach((el) => {
       if (reduce) return gsap.set(el, { clipPath: 'inset(0% 0 0 0)' });
+      if (pinnedStrip && el.closest('[data-hscroll-track]')) return;
       gsap.to(el, {
         clipPath: 'inset(0% 0 0 0)',
         duration: 1.4,
@@ -188,17 +191,40 @@ function initReveals() {
           ro.observe(track);
           observers.push(ro);
         }
-        gsap.to(track, {
+        // A short hold before and after the slide: the strip sits still while you read the intro, and the
+        // last card stays on screen for a moment before the page scrolls on, instead of being flicked past.
+        const hold = () => window.innerHeight * 0.35;
+        const pin = ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: () => '+=' + (dist() + 2 * hold()),
+          pin: true,
+          invalidateOnRefresh: true,
+        });
+        // The slide itself: linear (needed for the card reveals below), with scrub smoothing the motion.
+        const slide = gsap.to(track, {
           x: () => -dist(),
           ease: 'none',
           scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: () => '+=' + dist(),
-            pin: true,
-            scrub: 1,
+            // Measured from the pin's own start: a position relative to the pinned section itself gets pushed past the pin.
+            start: () => pin.start + hold(),
+            end: () => pin.start + hold() + dist(),
+            scrub: 1.2,
             invalidateOnRefresh: true,
           },
+        });
+        // Same bottom-up wipe as everywhere else. Cards already on screen when the strip arrives wipe in as the
+        // section scrolls up into view; the rest wipe in as soon as their edge slides in from the right.
+        track.querySelectorAll<HTMLElement>('[data-reveal-img]').forEach((el) => {
+          const onScreen = el.getBoundingClientRect().left - (gsap.getProperty(track, 'x') as number) < window.innerWidth;
+          gsap.to(el, {
+            clipPath: 'inset(0% 0 0 0)',
+            duration: 1.1,
+            ease: 'expo.out',
+            scrollTrigger: onScreen
+              ? { trigger: el, start: 'top 85%' }
+              : { trigger: el, containerAnimation: slide, start: 'left 100%' },
+          });
         });
       });
     });

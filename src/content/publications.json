@@ -1,6 +1,6 @@
 [
-  { "id": "p-ceres", "title": "Spectrophotometric study of Ceres using VIR instrument data from DAWN mission", "authors": "S. Mahato, G. Thangjam", "venue": "Manuscript in preparation", "year": "2026", "type": "paper" },
-  { "id": "p-artifact", "title": "Artifact Correction of DAWN-VIR Instrument Data", "authors": "S. Mahato, G. Thangjam", "venue": "Manuscript in preparation", "year": "2026", "type": "paper" },
+  { "id": "p-ceres", "title": "Spectrophotometric study of Ceres using VIR instrument data from DAWN mission", "authors": "S. Mahato, G. Thangjam", "year": "2026", "type": "paper", "status": "in-preparation" },
+  { "id": "p-artifact", "title": "Artifact Correction of DAWN-VIR Instrument Data", "authors": "S. Mahato, G. Thangjam", "year": "2026", "type": "paper", "status": "in-preparation" },
   { "id": "t-step25", "title": "Spectrophotometric & thermal correction studies", "authors": "S. Mahato", "venue": "STEP-2025, IIT Roorkee", "year": "2025", "type": "talk" },
   { "id": "t-ipsc25", "title": "Spectrophotometric study of Ceres", "authors": "S. Mahato", "venue": "IPSC-2025, Roorkee", "year": "2025", "type": "talk" },
   { "id": "w-ngri", "title": "AI-ML Training Programme for Geophysical Data Analysis", "authors": "7-day programme", "venue": "CSIR-NGRI, Hyderabad", "year": "2025", "type": "workshop" },

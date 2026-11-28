@@ -1,3 +1,12 @@
+// Labels for a paper's stage (publications.json `status`). Update the status as a paper moves along.
+export const pubStatus = {
+  'in-preparation': 'In preparation',
+  submitted: 'Submitted',
+  'in-review': 'In review',
+  accepted: 'Accepted',
+  published: 'Published',
+} as const;
+
 // Central place for your personal details. Edit here, it updates everywhere.
 export const site = {
   name: 'Sourav Mahato',
@@ -10,6 +19,11 @@ export const site = {
   location: 'Bhubaneswar, India',
   coords: '20.18° N · 85.71° E',
   status: 'Open to PhD positions · 2027',
+  // Default 1200×630 card shown when a page is shared on WhatsApp, LinkedIn, Slack, email…
+  ogImage: '/og/default.jpg',
+  affiliation: { name: 'National Institute of Science Education and Research (NISER)', url: 'https://www.niser.ac.in' },
+  // Topics for search engines (schema.org knowsAbout)
+  topics: ['Planetary science', 'Reflectance spectroscopy', 'Photometric correction', 'Hapke model', 'Chandrayaan-2 IIRS', 'Dawn VIR', 'Ceres', 'Scientific instrumentation'],
   links: [
     { label: 'GitHub', href: 'https://github.com/mahatosourav00' },
     // Add when ready:

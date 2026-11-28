@@ -27,8 +27,10 @@ const grewFrom = self ? self.data.from.map((f) => ({ step: steps.find((st) => st
     { k: 'When', v: d.period },
   ]}
   next={{ href: `/research/${next.id}`, title: next.data.short }}
+  cover={d.cover}
 >
-  <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.mission ?? d.short} ratio="21 / 9" eager sizes="100vw" /></div>
+  {/* No cover yet (results still unpublished): skip the hero so the page opens on the text, not an empty box */}
+  {d.cover && <div slot="hero" class="wrap"><Media src={d.cover} alt={d.title} label={d.mission ?? d.short} ratio="21 / 9" eager sizes="100vw" /></div>}
   <Content />
   <div slot="aside" class="aside">
     <p class="mono muted">Keywords</p>

@@ -10,12 +10,14 @@ interface Props {
   // 'hover' : poster until hovered / tapped, no controls (small gallery tiles)
   // 'ambient': plays while on screen, no controls, like a moving photo (showreel tiles)
   mode?: 'view' | 'hover' | 'ambient';
+  /** Wipe the clip in from the bottom when it scrolls into view, like photo tiles. Off for showreel tiles. */
+  reveal?: boolean;
 }
-const { src, poster, alt, ratio, mode = 'view' } = Astro.props;
+const { src, poster, alt, ratio, mode = 'view', reveal = mode !== 'ambient' } = Astro.props;
 const r = ratio ?? (poster ? `${poster.width} / ${poster.height}` : '16 / 9');
 const hover = mode === 'hover';
 ---
-<div class:list={['vid', { 'vid--hover': hover }]} style={`aspect-ratio:${r}`}>
+<div class:list={['vid', { 'vid--hover': hover }]} style={`aspect-ratio:${r}`} data-reveal-img={reveal ? '' : undefined}>
   <video
     src={src}
     poster={poster?.src}

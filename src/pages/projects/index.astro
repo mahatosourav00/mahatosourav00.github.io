@@ -21,6 +21,7 @@ const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
         <button class:list={['filter', { 'is-on': i === 0 }]} data-filter={k} aria-pressed={i === 0 ? 'true' : 'false'}>{k}</button>
       ))}
     </div>
+    <h2 class="sr-only">All builds</h2>
     <div class="pgrid">
       {projects.map((p, i) => (
         <div class="pgrid__item" data-kind={p.data.kind}><ProjectCard project={p} index={i} /></div>
@@ -54,8 +55,7 @@ const kinds = ['All', ...new Set(projects.map((p) => p.data.kind))];
   .filter:hover { color: var(--text); }
   .filter.is-on { background: var(--text); color: var(--bg); border-color: var(--text); }
   .pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 64px clamp(20px, 3vw, 40px); }
-  .pgrid__item:nth-child(3n + 2) { margin-top: 80px; }
   .pgrid__item[hidden] { display: none; }
-  @media (max-width: 1000px) { .pgrid { grid-template-columns: 1fr 1fr; } .pgrid__item:nth-child(3n + 2) { margin-top: 0; } .pgrid__item:nth-child(even) { margin-top: 60px; } }
-  @media (max-width: 620px) { .pgrid { grid-template-columns: 1fr; } .pgrid__item:nth-child(even) { margin-top: 0; } }
+  @media (max-width: 1000px) { .pgrid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 620px) { .pgrid { grid-template-columns: 1fr; } }
 </style>

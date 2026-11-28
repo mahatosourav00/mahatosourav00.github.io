@@ -24,7 +24,7 @@ npm run build    # outputs to dist/
 | Résumé PDF | `public/cv/Sourav-Mahato-Resume.pdf` |
 | Colours, fonts, spacing | `src/styles/global.css` (tokens at the top) |
 | Hero Moon/Ceres shader | `src/lib/globe.ts` |
-| Lab toys | `src/components/toys/` |
+| Play page toys (Hapke model, spectrum explorer) | `src/components/toys/` |
 
 ## Adding photos
 

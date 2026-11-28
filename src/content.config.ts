@@ -33,6 +33,8 @@ const projects = defineCollection({
       featured: z.boolean().default(false),
       specs: z.array(z.object({ k: z.string(), v: z.string() })).default([]),
       cover: image().optional(),
+      // Crop focus for the 4:5 build card (CSS object-position), e.g. "30% center" keeps the left-of-centre part of a wide photo.
+      coverFocus: z.string().optional(),
       // `video` is a path under /public (e.g. /videos/iot/ambilight.mp4); `src` then acts as its poster frame.
       // `group` becomes a small heading above the tiles that share it (keep groups to 2-4 tiles).
       gallery: z.array(z.object({ src: image().optional(), video: z.string().optional(), caption: z.string(), group: z.string().optional() })).default([]),
@@ -134,9 +136,12 @@ const publications = defineCollection({
   schema: z.object({
     title: z.string(),
     authors: z.string(),
-    venue: z.string(),
+    // Journal or event. Leave out for papers that don't have a journal yet.
+    venue: z.string().optional(),
     year: z.string(),
     type: z.enum(['paper', 'talk', 'workshop', 'fellowship']),
+    // Papers only: where the manuscript stands. Shown as a badge.
+    status: z.enum(['in-preparation', 'submitted', 'in-review', 'accepted', 'published']).optional(),
     url: z.string().optional(),
   }),
 });

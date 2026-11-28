@@ -6,6 +6,7 @@ import portrait from '../assets/images/portrait.jpg';
 import { getCollection } from 'astro:content';
 import { site } from '../lib/site';
 import { getNotes } from '../lib/notes';
+import { pubStatus } from '../lib/site';
 
 const research = (await getCollection('research')).filter((r) => r.data.featured).sort((a, b) => a.data.order - b.data.order);
 // The home strip shows hand-picked builds (`featured: true`): instruments, flying machines and apps.
@@ -22,14 +23,36 @@ const pubs = (await getCollection('publications'))
 const latestNotes = (await getNotes()).slice(0, 3);
 const noteDate = (d: Date) => d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
+// Counted from the content files, so the numbers stay true as entries are added.
+// Physical builds = everything except apps (Software) and coursework simulations/experiments (Academic).
+const allPubs = await getCollection('publications');
+const allProjects = await getCollection('projects');
+const physicalBuilds = allProjects.filter((p) => p.data.kind !== 'Software' && p.data.kind !== 'Academic').length;
 const stats = [
-  { n: '4', l: 'Planetary missions worked with' },
-  { n: '5', l: 'Conference talks' },
-  { n: '9+', l: 'Instruments & machines built' },
-  { n: '2', l: 'ISRO & Max Planck fellowships' },
+  // Main research on Chandrayaan-1, Chandrayaan-2 and Dawn; LRO data used to verify results. Edit by hand if this changes.
+  { n: '4+', l: "Missions' data analysed: Chandrayaan-1 & 2, Dawn, LRO" },
+  { n: `${allPubs.filter((p) => p.data.type === 'talk').length}+`, l: 'Conference talks' },
+  { n: `${physicalBuilds}+`, l: 'Instruments & machines built' },
+  { n: String(allPubs.filter((p) => p.data.type === 'fellowship').length), l: 'Fellowships, incl. ISRO & Max Planck' },
 ];
+
+// Tells search engines who this site is about (schema.org Person). Add ORCID / LinkedIn to site.links and they join `sameAs`.
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  url: Astro.site?.href,
+  image: new URL(portrait.src, Astro.site).href,
+  jobTitle: site.role,
+  description: site.description,
+  email: `mailto:${site.email}`,
+  affiliation: { '@type': 'CollegeOrUniversity', name: site.affiliation.name, url: site.affiliation.url },
+  address: { '@type': 'PostalAddress', addressLocality: 'Bhubaneswar', addressRegion: 'Odisha', addressCountry: 'IN' },
+  knowsAbout: site.topics,
+  sameAs: site.links.map((l) => l.href),
+};
 ---
-<Base>
+<Base jsonLd={personLd}>
   <!-- ───── LOADER (first visit per session) ───── -->
   <div class="loader" data-loader role="status" aria-live="polite">
     <div class="loader__inner">
@@ -64,7 +87,7 @@ const stats = [
           </p>
         </div>
 
-        <div class="hero__story" data-story aria-live="polite">
+        <div class="hero__story" data-story>
           <p class="display-s">I study how sunlight scatters off <span class="italic">airless worlds</span>, the Moon and Ceres, and I build the instruments to measure it.</p>
         </div>
 
@@ -88,7 +111,7 @@ const stats = [
         <p class="lead muted about__lead" data-reveal>I want to bring those two worlds together. I'm looking for a PhD where hardware and software meet planetary science.</p>
         <a href="/hobbies#making" class="bridge" data-reveal>
           <span class="mono accent">How one led to the other</span>
-          <span class="bridge__t">From a ₹5,000 scholarship to Chandrayaan-2 →</span>
+          <span class="bridge__t">From a ₹5,000 scholarship to <span class="nobr">Chandrayaan<span class="hy">-</span>2</span> →</span>
         </a>
         <div class="about__cta" data-reveal>
           <a href="/journey" class="btn">My journey →</a>
@@ -148,9 +171,9 @@ const stats = [
             <span class="mono accent">{p.data.year}</span>
             <div>
               <p class="pitem__t">{p.data.title}</p>
-              <p class="mono muted">{p.data.venue}</p>
+              <p class="mono muted">{p.data.venue ?? p.data.authors}</p>
             </div>
-            <span class="tag">{p.data.type}</span>
+            <span class="tag">{p.data.status ? pubStatus[p.data.status] : p.data.type}</span>
           </li>
         ))}
       </ul>
@@ -193,7 +216,7 @@ const stats = [
     </div>
   </section>
 
-  <!-- ───── PUBLICATIONS ───── -->
+  <!-- ───── NOTES ───── -->
   {latestNotes.length > 0 && (
     <section class="section notes-home">
       <div class="wrap">
@@ -206,10 +229,10 @@ const stats = [
         </div>
         <div class="ngrid">
           {latestNotes.map((n) => (
-            <a href={`/notes/${n.id}`} class="ncard" data-cursor="Read" data-reveal>
+            <a href={`/notes/${n.id}`} class="ncard" data-cursor="Read">
               {n.data.cover
                 ? <Media src={n.data.cover} alt="" label={n.data.title} ratio="3 / 2" sizes="(max-width: 800px) 100vw, 30vw" />
-                : <span class="ncard__ph mono accent" aria-hidden="true">{n.data.series}</span>}
+                : <span class="ncard__ph mono accent" aria-hidden="true" data-reveal-img>{n.data.series}</span>}
               <p class="mono ncard__meta"><span class="accent">{n.data.series}</span><span class="muted">{noteDate(n.data.date)}</span></p>
               <h3 class="ncard__t">{n.data.title}</h3>
               <p class="muted ncard__d">{n.data.description}</p>
@@ -500,6 +523,9 @@ const stats = [
   .bridge { display: inline-flex; flex-direction: column; gap: 6px; margin-top: 28px; padding: 16px 20px; border: 1px solid var(--line); border-radius: var(--radius); transition: border-color 0.3s; }
   .bridge .mono { font-size: 10px; }
   .bridge__t { font-family: var(--font-display); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; transition: color 0.3s; }
+  /* Instrument Serif's hyphen has wide side-bearings: pull it in and keep the mission name on one line */
+  .nobr { white-space: nowrap; }
+  .hy { margin-inline: -0.07em; }
   .bridge:hover { border-color: var(--accent); }
   .bridge:hover .bridge__t { color: var(--accent); }
   .notes-home__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
