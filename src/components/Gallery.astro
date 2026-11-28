@@ -1,13 +1,16 @@
 ---
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
 import Media from './Media.astro';
 import Video from './Video.astro';
 
-interface Item { src?: ImageMetadata; video?: string; caption: string; group?: string }
+interface Item { src?: ImageMetadata; video?: string; caption: string; group?: string; fit?: 'cover' | 'contain' }
 interface Props { items: Item[] }
 const { items: all } = Astro.props;
 // Tiles without a photo or video would only render "coming soon" boxes, so skip them.
 const items = all.filter((i) => i.src || i.video);
+// Diagrams, charts and screenshots (PNG/SVG, or `fit: contain`) are never cropped: they keep their own shape.
+const isFigure = (i: Item) => !i.video && !!i.src && (i.fit ? i.fit === 'contain' : i.src.format === 'png' || i.src.format === 'svg');
 
 // Group consecutive items by `group` (first-seen order). Ungrouped galleries get one unnamed group.
 const order: string[] = [];
@@ -18,14 +21,17 @@ for (const it of items) {
   map.get(g)!.push(it);
 }
 const named = order.some((g) => g !== '');
+// Full-size versions of figures, opened when the tile is clicked (wiring and screenshots need zooming to read)
+const full = new Map(await Promise.all(items.filter(isFigure).map(async (i) => [i, (await getImage({ src: i.src!, width: Math.min(i.src!.width, 2400) })).src] as const)));
 
 const groups = order.map((g) => {
   const list = map.get(g)!;
+  const hasFigure = list.some(isFigure);
   const portrait = list.filter((i) => i.src && i.src.height > i.src.width).length;
   const isPortrait = portrait > list.length / 2;
   const n = list.length;
   let cols = isPortrait ? Math.min(n, 4) : n >= 5 ? 3 : n === 4 ? 2 : Math.max(n, 1);
-  const lead = !isPortrait && n === 3; // one big tile + two stacked
+  const lead = !isPortrait && n === 3 && !hasFigure; // one big tile + two stacked (photos only: it crops the big tile)
   if (n === 1) cols = 1;
   const maxw = isPortrait ? cols * 330 : cols === 1 ? 760 : cols === 2 ? 920 : 0;
   // Landscape tiles follow the group's average shape (between 4:3 and 3:2) so charts and photos are barely cropped.
@@ -43,10 +49,14 @@ const groups = order.map((g) => {
       )}
       <div class:list={['ggrid', { 'ggrid--lead': g.lead }]} style={`--cols:${g.cols};--r:${g.ratio};${g.maxw ? `max-width:${g.maxw}px` : ''}`}>
         {g.list.map((it, i) => (
-          <figure class:list={['tile', { 'tile--lead': g.lead && i === 0 }]}>
+          <figure class:list={['tile', { 'tile--lead': g.lead && i === 0, 'tile--fig': isFigure(it) }]}>
             {it.video
               ? <Video src={it.video} poster={it.src} alt={it.caption} mode="hover" />
-              : <Media src={it.src} alt={it.caption} label={it.caption} ratio={g.ratio} sizes="(max-width: 700px) 100vw, 40vw" />}
+              : isFigure(it)
+                ? <a href={full.get(it)} target="_blank" rel="noopener" class="fig" style={`--ar:${(it.src!.width / it.src!.height).toFixed(4)}`} data-cursor="Zoom" aria-label={`${it.caption} (open full size)`}>
+                    <Media src={it.src} alt={it.caption} label={it.caption} ratio={`${it.src!.width} / ${it.src!.height}`} sizes="(max-width: 700px) 100vw, 50vw" />
+                  </a>
+                : <Media src={it.src} alt={it.caption} label={it.caption} ratio={g.ratio} sizes="(max-width: 700px) 100vw, 40vw" />}
             <figcaption class="mono muted">{it.caption}</figcaption>
           </figure>
         ))}
@@ -59,9 +69,13 @@ const groups = order.map((g) => {
   .gal { display: grid; gap: clamp(56px, 7vw, 96px); }
   .grp__title { display: flex; align-items: baseline; gap: 16px; font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 3vw, 38px); line-height: 1.1; margin: 0 0 clamp(20px, 2.4vw, 32px); }
   .grp__title .mono { font-size: 11px; letter-spacing: 0.08em; }
-  .ggrid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); }
+  .ggrid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: clamp(16px, 2vw, 28px); align-items: start; }
   .tile { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  .tile :global(.media), .tile :global(.vid) { aspect-ratio: var(--r) !important; }
+  .tile:not(.tile--fig) :global(.media), .tile :global(.vid) { aspect-ratio: var(--r) !important; }
+  /* Figures keep their own shape, shown whole; very tall ones (phone screenshots) narrow instead of growing past 640px */
+  .fig { display: block; width: min(100%, calc(640px * var(--ar))); margin-inline: auto; }
+  .tile--fig :global(.media__img) { object-fit: contain; }
+  .tile--fig:hover :global(.media__img) { transform: none; }
   .tile figcaption { text-transform: none; letter-spacing: 0; line-height: 1.45; }
   .ggrid--lead { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .tile--lead { grid-column: span 2; grid-row: span 2; }
@@ -70,6 +84,6 @@ const groups = order.map((g) => {
     .ggrid { grid-template-columns: repeat(min(var(--cols), 2), minmax(0, 1fr)); max-width: none !important; }
     .ggrid--lead { grid-template-columns: 1fr; }
     .tile--lead { grid-column: auto; grid-row: auto; }
-    .tile--lead :global(.media), .tile--lead :global(.vid) { aspect-ratio: var(--r) !important; flex: none; }
+    .tile--lead:not(.tile--fig) :global(.media), .tile--lead :global(.vid) { aspect-ratio: var(--r) !important; flex: none; }
   }
 </style>

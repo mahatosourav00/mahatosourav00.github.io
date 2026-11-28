@@ -37,7 +37,8 @@ const projects = defineCollection({
       coverFocus: z.string().optional(),
       // `video` is a path under /public (e.g. /videos/iot/ambilight.mp4); `src` then acts as its poster frame.
       // `group` becomes a small heading above the tiles that share it (keep groups to 2-4 tiles).
-      gallery: z.array(z.object({ src: image().optional(), video: z.string().optional(), caption: z.string(), group: z.string().optional() })).default([]),
+      // PNG/SVG images (diagrams, charts, screenshots) are shown whole; set `fit: contain` on a photo to do the same, or `fit: cover` on a PNG to crop it.
+      gallery: z.array(z.object({ src: image().optional(), video: z.string().optional(), caption: z.string(), group: z.string().optional(), fit: z.enum(['cover', 'contain']).optional() })).default([]),
       // 'in-progress' shows a badge on the card and a Status line on the page.
       status: z.enum(['done', 'in-progress']).default('done'),
       // Two or three headline facts for the typographic card used when there's no cover photo,
